@@ -438,3 +438,75 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 ## Testing the Save API
 
+Here will be using insomnia
+* Postman, thunderclient etc also work.
+
+Link: https://insomnia.rest/download
+
+Load the app and H2 will make the department object for you.
+
+![h2 udated with department screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/h2_updated_with_department.png)
+
+Inside insomnia send this JSON
+
+```json
+{
+	"departmentName":"IT",
+	"departmentAddress":"Bangalore",
+	"departmentCode":"IT-06"
+}
+```
+
+it should return the information back and give 200 OK like so
+
+![insomnia test post screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_post.png)
+
+And H2 will reflect that
+
+
+![h2_after_post screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/h2_after_post.png)
+
+
+Same way with a second record
+
+```json
+{
+	"departmentName":"CE",
+	"departmentAddress":"Bangalore",
+	"departmentCode":"CE-07"
+}
+```
+
+H2 DB will have a 2nd row now.
+
+Save is working great! Now lets work on GET APIs
+
+## Get Mapping
+
+Fetch data from DB
+
+Add to DepartmentController
+```java
+@GetMapping("/departments")
+public List<Department> fetchDepartmentList() {
+    return departmentService.fetchDepartmentList(); // no input b/c sending all data back
+}
+```
+
+Add to department service
+
+```java
+public List<Department> fetchDepartmentList();
+```
+
+Add to the department service impl
+```java
+@Override
+public List<Department> fetchDepartmentList() {
+    return departmentRepository.findAll(); // Done! Easy!
+}
+```
+
+
+![insomnia_test_get_all_depts screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_get_all_depts.png)
+
