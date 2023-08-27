@@ -771,7 +771,7 @@ Doctor{qualification=null"}
     Bean destroy
 6. Custom destroy
 
-// TODO put lifecycle screenshot here
+![Bean life cycle image](https://i.stack.imgur.com/kpcdR.png)
 
 Custom methods
 * Default values
