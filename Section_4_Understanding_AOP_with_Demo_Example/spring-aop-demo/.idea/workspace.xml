@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="01a13c4c-9bad-4088-9c15-58b4da9b466a" name="Changes" comment="" />
+    <list default="true" id="499c1505-1bfb-475b-8431-93b116c40225" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/demo/ShoppingCart.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Section_3_What_is_AOP_plus_example/What_is_AOP.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/demo/Main.java" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,7 +26,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="ProjectId" id="2UZhH1P5jpaHjLVxy1J9AZqyjtp" />
+  <component name="ProjectId" id="2UZkRnS1Cu4MKOYCwEbub33UKt2" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -55,11 +61,11 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="01a13c4c-9bad-4088-9c15-58b4da9b466a" name="Changes" comment="" />
-      <created>1693152918897</created>
+      <changelist id="499c1505-1bfb-475b-8431-93b116c40225" name="Changes" comment="" />
+      <created>1693154485411</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1693152918897</updated>
+      <updated>1693154485411</updated>
     </task>
     <servers />
   </component>

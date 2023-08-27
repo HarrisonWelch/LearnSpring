@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.harrison</groupId>
   <artifactId>spring-aop-demo</artifactId>
@@ -23,7 +23,7 @@
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjrt</artifactId>
       <version>1.9.7</version>
-      <scope>runtime</scope>
+<!--      <scope>runtime</scope>-->
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
@@ -31,7 +31,7 @@
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
       <version>1.9.7</version>
-      <scope>runtime</scope>
+<!--      <scope>runtime</scope>-->
     </dependency>
 
   </dependencies>

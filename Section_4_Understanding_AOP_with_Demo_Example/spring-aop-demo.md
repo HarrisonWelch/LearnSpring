@@ -54,3 +54,70 @@ After all this, the pom.xml file will look like this:
 </project>
 
 ```
+
+## Initial Setup
+
+Shopping Cart
+```java
+package demo;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class ShoppingCart {
+    public void checkout() {
+        System.out.println("Checkout Method from Shopping Cart Called");
+    }
+}
+
+```
+
+BeanConfig
+```java
+package demo;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ComponentScan(basePackages = "demo")
+public class BeanConfig {
+}
+
+```
+
+Main
+```java
+package demo;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Main {
+    public static void main(String[] args) {
+        ApplicationContext context = new AnnotationConfigApplicationContext(BeanConfig.class);
+
+        ShoppingCart cart = context.getBean(ShoppingCart.class);
+        cart.checkout();
+    }
+}
+
+```
+
+output
+```
+Checkout Method from Shopping Cart Called
+```
+
+## Now cross cut concerns
+
+```java
+public void checkout() {
+    // Logging
+    // Authentication & Authorization
+    // Sanitize the Data
+    System.out.println("Checkout Method from Shopping Cart Called");
+}
+```
+
+Lets use AOP in the next section.
