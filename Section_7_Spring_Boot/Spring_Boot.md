@@ -507,6 +507,156 @@ public List<Department> fetchDepartmentList() {
 }
 ```
 
+Restarted the app, need to post 3 department objects
+
+And we get all three back like so:
 
 ![insomnia_test_get_all_depts screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_get_all_depts.png)
+
+Works!
+
+## Get dept by ID
+
+Add to department controller
+
+```java
+@GetMapping("/departments/{id}") // path variable
+public Department fetchDepartmentById(@PathVariable("id") Long departmentId) {
+    return departmentService.fetchDepartmentById(departmentId);
+}
+```
+
+Add to department service
+
+```java
+public Department fetchDepartmentById(Long departmentId);
+```
+
+Add to department service impl
+
+```java
+@Override
+public Department fetchDepartmentById(Long departmentId) {
+    return departmentRepository.findById(departmentId).get();
+}
+```
+
+Quick test
+* Note: need to add the data each time, for some reason its not persistent across app runs. Maybe gets solved later? H2 embed is a good test though.
+
+![insomnia_test_get_dept_by_id screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_get_dept_by_id.png)
+
+## Deleting data
+
+
+Add to department controller
+
+```java
+@DeleteMapping("/departments/{id}")
+public String deleteDepartmentById(@PathVariable("id") Long departmentId) {
+    departmentService.deleteDepartmentById(departmentId);
+    return "Department deleted successfully";
+}
+```
+
+Add to department service
+
+```java
+public void deleteDepartmentById(Long departmentId);
+```
+
+Add to department service impl
+
+```java
+@Override
+public void deleteDepartmentById(Long departmentId) {
+    departmentRepository.deleteById(departmentId);
+}
+```
+
+Quick test
+
+![insomnia_test_delete_by_id screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_delete_by_id.png)
+
+## Updating data
+
+Add to department controller
+
+```java
+@PutMapping("/departments/{id}")
+public Department updateDepartment(@PathVariable("id") Long departmentId, @RequestBody Department department) {
+    return departmentService.updateDepartment(departmentId, department);
+}
+```
+
+Add to department service
+
+```java
+public Department updateDepartment(Long departmentId, Department department);
+```
+
+Add to department service impl
+
+```java
+@Override
+public Department updateDepartment(Long departmentId, Department department) {
+    // Take value from DB
+    Department depDB = departmentRepository.findById(departmentId).get();
+
+    // test if incoming dept name is non-null and not empty
+    if (Objects.nonNull(department.getDepartmentName()) && !"".equalsIgnoreCase(department.getDepartmentName())){
+        depDB.setDepartmentName(department.getDepartmentName());
+    }
+
+    // test if incoming dept code is non-null and not empty
+    if (Objects.nonNull(department.getDepartmentCode()) && !"".equalsIgnoreCase(department.getDepartmentCode())){
+        depDB.setDepartmentCode(department.getDepartmentCode());
+    }
+
+    // test if incoming dept addr is non-null and not empty
+    if (Objects.nonNull(department.getDepartmentAddress()) && !"".equalsIgnoreCase(department.getDepartmentAddress())){
+        depDB.setDepartmentAddress(department.getDepartmentAddress());
+    }
+
+    // return the save entity
+    return departmentRepository.save(depDB);
+}
+```
+
+Setup, add 3 departments
+
+![insomnia_test_update_start screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_update_start.png)
+
+Update (PUT) on ID 2
+
+```json
+{
+    "departmentName": "Information Technology",
+    "departmentAddress": "Amal",
+    "departmentCode": "CS-06"
+}
+```
+
+![insomnia_test_update_id_2 screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_update_id_2.png)
+
+Setup, end
+
+![insomnia_test_update_end screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_update_end.png)
+
+H2 reflects this change as well
+
+![insomnia_test_update_end_h2 screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_update_end_h2.png)
+
+You can also just update one of the fields by only sending the fields you want changed.
+
+```json
+{
+    "departmentAddress": "New York"
+}
+```
+
+![insomnia_test_update_partial screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_test_update_partial.png)
+
+## Fetch data by name
+
 
