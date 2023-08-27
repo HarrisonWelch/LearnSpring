@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="499c1505-1bfb-475b-8431-93b116c40225" name="Changes" comment="" />
+    <list default="true" id="499c1505-1bfb-475b-8431-93b116c40225" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../Section_5_Logging_Aspect_example/Logging_Aspect_example.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../Section_5_Logging_Aspect_example/Logging_Aspect_example.md" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
