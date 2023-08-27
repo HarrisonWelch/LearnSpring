@@ -771,11 +771,57 @@ Doctor{qualification=null"}
     Bean destroy
 6. Custom destroy
 
-// TODO put screenshot here
+// TODO put lifecycle screenshot here
 
-custome methods
+Custom methods
 * Default values
 * open or close files
 * open or close DB connections
 
-50:38
+We can see this life cycle with the BeanNameAware interface
+
+```java
+public class Doctor implements Staff, BeanNameAware {...}
+```
+And add the required method
+```java
+@Override
+public void setBeanName(String name) {
+    System.out.println("Set Bean name method is called");
+}
+```
+output
+```
+Set Bean name method is called
+Doctor is assisting
+```
+
+We can see the set bean name method is called in the life cycle before it is used for creating Doctor objects.
+
+We can also see this in the post contruct.
+First we must add a new dependency
+
+```xml
+<dependency>
+    <groupId>javax.annotation</groupId>
+    <artifactId>javax.annotation-api</artifactId>
+    <version>1.3.2</version>
+</dependency>
+```
+Then we can annotate and add a postConstruct method in the doctor class
+```java
+@PostConstruct
+public void postConstruct() {
+    System.out.println("Post construct method is called");
+}
+```
+Running main again we see the set bean name happening during the construct or making of the bean. Then post construct is called. Then Doctor can be and is used.
+
+output
+```
+Set Bean name method is called
+Post construct method is called
+Doctor is assisting
+```
+
+Same way with PreDestroy method as well.
