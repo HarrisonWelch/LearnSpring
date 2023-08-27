@@ -229,3 +229,212 @@ It should load up the H2 console
 
 ![H2 screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/h2.png)
 
+Many things should populate from the application.properties
+* Note: I had to drop in the JDBC URL from the config.
+
+Type in the password and hit test connection
+
+![H2 test connection screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/h2_test_connection.png)
+
+## Creating components
+
+Create the following packages:
+1. department
+2. entity
+3. repository
+4. service
+
+Name make the Deparment Entity
+
+```java
+package com.harrison.Springboot.tutorial.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Department {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long departmentID;
+    private String departmentName;
+    private String departmentAddress;
+    private String departmentCode;
+
+    public Long getDepartmentID() {
+        return departmentID;
+    }
+
+    public void setDepartmentID(Long departmentID) {
+        this.departmentID = departmentID;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getDepartmentAddress() {
+        return departmentAddress;
+    }
+
+    public void setDepartmentAddress(String departmentAddress) {
+        this.departmentAddress = departmentAddress;
+    }
+
+    public String getDepartmentCode() {
+        return departmentCode;
+    }
+
+    public void setDepartmentCode(String departmentCode) {
+        this.departmentCode = departmentCode;
+    }
+
+    public Department(Long departmentID, String departmentName, String departmentAddress, String departmentCode) {
+        this.departmentID = departmentID;
+        this.departmentName = departmentName;
+        this.departmentAddress = departmentAddress;
+        this.departmentCode = departmentCode;
+    }
+
+    public Department() {
+    }
+
+    @Override
+    public String toString() {
+        return "Department{" +
+                "departmentID=" + departmentID +
+                ", departmentName='" + departmentName + '\'' +
+                ", departmentAddress='" + departmentAddress + '\'' +
+                ", departmentCode='" + departmentCode + '\'' +
+                '}';
+    }
+}
+
+```
+
+Department service interface
+```java
+package com.harrison.Springboot.tutorial.service;
+
+public interface DepartmentService {
+
+}
+```
+Department service impl
+
+```java
+package com.harrison.Springboot.tutorial.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class DepartmentServiceImpl implements DepartmentService {
+}
+
+```
+
+DepartmentController
+```java
+package com.harrison.Springboot.tutorial.controller;
+
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class DepartmentController {
+}
+
+```
+
+And Department repository
+
+```java
+package com.harrison.Springboot.tutorial.repository;
+
+import com.harrison.Springboot.tutorial.entity.Department;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface DepartmentRepository extends JpaRepository<Department, Long> { // Entity and primary key type
+}
+
+```
+
+Current solution tree looks like this:
+
+![current solution tree 2 13 50 screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/current_solution_tree_2_13_50.png)
+
+## Save API
+
+DepartmentController
+```java
+package com.harrison.Springboot.tutorial.controller;
+
+import com.harrison.Springboot.tutorial.entity.Department;
+import com.harrison.Springboot.tutorial.service.DepartmentService;
+import com.harrison.Springboot.tutorial.service.DepartmentServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class DepartmentController {
+
+    @Autowired // Auto wire the service you already have and attach to this controller object
+    private DepartmentService departmentService;
+    @PostMapping("/departments")
+    public Department saveDepartment(@RequestBody Department department) { // JSON converted to Department
+        // Spring will convert the data itself
+        // Old way where we ask for the control, DepartmentService service = new DepartmentServiceImpl();
+        // Invert control by using the Autowired annotation as seen above
+        return departmentService.saveDepartment(department);
+    }
+
+}
+
+```
+
+DepartmentService.java
+```java
+package com.harrison.Springboot.tutorial.service;
+
+import com.harrison.Springboot.tutorial.entity.Department;
+
+public interface DepartmentService {
+
+    public Department saveDepartment(Department department);
+}
+```
+
+DepartmentServiceImpl
+```java
+package com.harrison.Springboot.tutorial.service;
+
+import com.harrison.Springboot.tutorial.entity.Department;
+import com.harrison.Springboot.tutorial.repository.DepartmentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class DepartmentServiceImpl implements DepartmentService {
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
+    @Override
+    public Department saveDepartment(Department department) {
+        return departmentRepository.save(department); // from the extended JpaRepository
+    }
+}
+
+```
+
+## Testing the Save API
+
