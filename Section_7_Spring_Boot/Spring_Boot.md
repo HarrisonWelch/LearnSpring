@@ -223,4 +223,6 @@ spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
 
 Stop and restart the app (connections need to be opened for the first time)
 
+Got to http://localhost:8082/h2-console
 
+It should load up the H2 console
