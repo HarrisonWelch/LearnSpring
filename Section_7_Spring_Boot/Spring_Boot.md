@@ -130,7 +130,7 @@ Reloading and going into localhost:8080 shows the "Welcome too Daily Code Buffer
 
 Change the default port away from 8080 for example to 8082.
 
-```shell
+```properties
 server.port = 8082
 # Documentation available for each property
 ```
@@ -143,3 +143,84 @@ Go to http://localhost:8082/
 ## Now
 
 The request mapping is still verbose
+
+Switch to `@GetMapping("/")` which is simplified of the previous thing.
+
+## Command line run
+
+`mvn spring-boot:run`
+
+## Devtools
+* detect changes and restart application
+
+Go back to start.spring.io and add the dependency. Use explore to pull the correct text.
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <scope>runtime</scope>
+    <optional>true</optional>
+</dependency>
+```
+
+Add this to the pom.xml
+
+Now open Advanced settings and enable "the auto-make when running" setting.
+* Note: In the video it says to go to registry using Ctrl+Shift+A, then enable "compiler.automake.allow.when.app.running" this was moved to advanced settings in 2021. Source: https://youtrack.jetbrains.com/issue/IDEA-274903/In-IntelliJ-2021.2-compiler.automake.allow.when.app.running-disappear.-Unable-to-enable-live-reload-under-Spring-boot
+
+![Compiler allow auto-make](https://youtrack.jetbrains.com/api/files/74-1125614?sign=MTY5MzM1MzYwMDAwMHwxMS0xfDc0LTExMjU2MTR8TUJhYmZmR0NmNTY1cXNzQmU1ZEh1c3V4cTZQ%0D%0ATW9TNF9WLWNMc2kxZHFsOA0K%0D%0A&updated=1627651335092)
+
+Then go to settings -> Build,Execution,Deployment -> Compiler and enable "Build project automatically"
+
+Now run the project, see that the text is still loading, change the text (random characters on the end). The project should appear to run-again, refresh the webpage (F5) and you should see the new text load - all without stopping and starting the Java project.
+
+## Develop application
+* Back end application for any number of front ends (Vue, Swift, etc)
+
+Rest API
+* GET
+* POST
+* PUT
+* DELETE
+
+Service layer
+* Main business layer to write all the logic
+
+Data access repo layer
+* DB access and operations
+
+into finally the DB
+* H2 in memory DB
+* Swith to MySQL DB later
+
+## Add dependency for H2 and JPA
+
+Go to https://start.spring.io/ like before and add the dependency for "Spring Data JPA"
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+```
+No version b/c whatever parent version is should be the same.
+
+Add this to pom.xml.
+
+### H2 config
+
+Add the following 
+
+```properties
+spring.h2.console.enabled=true
+spring.datasource.url=jdbc:h2:mem:dcbapp
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=password
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+```
+
+Stop and restart the app (connections need to be opened for the first time)
+
+
