@@ -1,5 +1,7 @@
 ## Authentication Aspect example
 
+Notes using the example from section 4 "spring-aop-demo"
+
 Can create one package for multiple types of point cuts
 
 AuthenticationAspect.java
