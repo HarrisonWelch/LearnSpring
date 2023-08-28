@@ -56,4 +56,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         // return the save entity
         return departmentRepository.save(depDB);
     }
+
+    @Override
+    public Department fetchDepartmentByName(String departmentName) {
+        // No default method to get by name, we have to create it our
+        return departmentRepository.findByDepartmentNameIgnoreCase(departmentName);
+    }
 }

@@ -659,4 +659,51 @@ You can also just update one of the fields by only sending the fields you want c
 
 ## Fetch data by name
 
+Add to department controller
 
+```java
+@GetMapping("/department/name/{name}")
+public Department fetchDepartmentByName(@PathVariable("name") String departmentName) {
+    return departmentService.fetchDepartmentByName(departmentName);
+}
+```
+
+Add to department service
+
+```java
+public Department fetchDepartmentByName(String departmentName);
+```
+
+Add to department service impl
+
+```java
+@Override
+public Department fetchDepartmentByName(String departmentName) {
+    // No default method to get by name, we have to create it our
+    return departmentRepository.findByDepartmentNameIgnoreCase(departmentName);
+}
+```
+
+No default method. Add this to the repository
+```java
+public Department findByDepartmentName(String departmentName);
+
+public Department findByDepartmentNameIgnoreCase(String departmentName); // Spring keyword search will do this for us
+```
+
+Spring does automatic query creation.
+
+https://docs.spring.io/spring-data/jpa/docs/1.6.0.RELEASE/reference/html/jpa.repositories.html
+
+Example would be "Distinct" which converts to adding DISTINCT to the JPQL snippet.
+
+You may have to force with query
+
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+
+  @Query("select u from User u where u.emailAddress = ?1")
+  User findByEmailAddress(String emailAddress);
+}
+```
+?1 for the first param, ?2 for second and so on
