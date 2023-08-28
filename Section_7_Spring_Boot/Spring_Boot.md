@@ -741,6 +741,8 @@ public Department saveDepartment(@Valid @RequestBody Department department) { //
 }
 ```
 
+Look at the defaultMessage in the lower right. "Please Add Department Name"
+
 ![pls_add_dept_name screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/pls_add_dept_name.png)
 
 * @Length is there (min and max value)
