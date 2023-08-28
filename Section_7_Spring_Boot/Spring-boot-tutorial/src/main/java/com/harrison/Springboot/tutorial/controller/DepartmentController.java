@@ -3,6 +3,9 @@ package com.harrison.Springboot.tutorial.controller;
 import com.harrison.Springboot.tutorial.entity.Department;
 import com.harrison.Springboot.tutorial.service.DepartmentService;
 import com.harrison.Springboot.tutorial.service.DepartmentServiceImpl;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,16 +16,24 @@ public class DepartmentController {
 
     @Autowired // Auto wire the service you already have and attach to this controller object
     private DepartmentService departmentService;
+
+    private final Logger LOGGER = LoggerFactory.getLogger(DepartmentController.class);
+
     @PostMapping("/departments")
-    public Department saveDepartment(@RequestBody Department department) { // JSON converted to Department
+    public Department saveDepartment(@Valid @RequestBody Department department) { // JSON converted to Department
         // Spring will convert the data itself
         // Old way where we ask for the control, DepartmentService service = new DepartmentServiceImpl();
         // Invert control by using the Autowired annotation as seen above
+        // @Valid will check agains the @NotBlank over in the Department class
+
+        LOGGER.info("Inside saveDepartment of Department controller");
+
         return departmentService.saveDepartment(department);
     }
 
     @GetMapping("/departments")
     public List<Department> fetchDepartmentList() {
+        LOGGER.info("Inside fetchDepartmentList of Department controller");
         return departmentService.fetchDepartmentList(); // no input b/c sending all data back
     }
 

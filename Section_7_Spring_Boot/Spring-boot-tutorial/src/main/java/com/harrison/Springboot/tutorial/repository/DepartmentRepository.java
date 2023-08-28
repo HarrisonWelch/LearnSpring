@@ -10,7 +10,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> { 
 
     public Department findByDepartmentName(String departmentName);
 
-    @Query("?1")
     public Department findByDepartmentNameIgnoreCase(String departmentName); // Spring keyword search will do this for us
 
 }

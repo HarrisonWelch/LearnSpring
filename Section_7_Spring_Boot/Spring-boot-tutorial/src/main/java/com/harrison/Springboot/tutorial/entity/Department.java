@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Department {
@@ -11,6 +12,8 @@ public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long departmentID;
+
+    @NotBlank(message = "Please Add Department Name") // Error message given if blank
     private String departmentName;
     private String departmentAddress;
     private String departmentCode;

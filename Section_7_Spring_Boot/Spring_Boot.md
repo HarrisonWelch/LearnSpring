@@ -707,3 +707,90 @@ public interface UserRepository extends JpaRepository<User, Long> {
 }
 ```
 ?1 for the first param, ?2 for second and so on
+
+## Hibernate Validation
+
+Department name should always be available
+
+Add this to pom.xml
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+```
+
+Add the `@NotBlank` annotation to the departmentName field of the department.
+```java
+@NotBlank(message = "Please Add Department Name") // Error message given if blank
+private String departmentName;
+```
+
+Add the `@Valid` annotation (from Jakarta) to the saveDepartment method of the DepartmentController.
+
+```java
+@Autowired // Auto wire the service you already have and attach to this controller object
+private DepartmentService departmentService;
+@PostMapping("/departments")
+public Department saveDepartment(@Valid @RequestBody Department department) { // JSON converted to Department
+    // Spring will convert the data itself
+    // Old way where we ask for the control, DepartmentService service = new DepartmentServiceImpl();
+    // Invert control by using the Autowired annotation as seen above
+    // @Valid will check agains the @NotBlank over in the Department class
+    return departmentService.saveDepartment(department);
+}
+```
+
+![pls_add_dept_name screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/pls_add_dept_name.png)
+
+* @Length is there (min and max value)
+* @Size - min and max
+* @Email validation
+* @Positive
+* @Negative
+* @PositiveOrZero
+* @FutureOrPresent - on date fields
+* @PastOrPresent
+
+All diff validators. Link below for jakarta validation constraints.
+
+https://jakarta.ee/specifications/bean-validation/3.0/apidocs/jakarta/validation/constraints/package-summary.html
+
+## Adding Loggers
+
+SLF4J logging
+
+For department controller, Add the following java
+
+```java
+private final Logger LOGGER = LoggerFactory.getLogger(DepartmentController.class);
+```
+
+Implement it in the methods down below like so
+```java
+@PostMapping("/departments")
+public Department saveDepartment(@Valid @RequestBody Department department) { // JSON converted to Department
+    // Spring will convert the data itself
+    // Old way where we ask for the control, DepartmentService service = new DepartmentServiceImpl();
+    // Invert control by using the Autowired annotation as seen above
+    // @Valid will check agains the @NotBlank over in the Department class
+
+    LOGGER.info("Inside saveDepartment of Department controller");
+
+    return departmentService.saveDepartment(department);
+}
+
+@GetMapping("/departments")
+public List<Department> fetchDepartmentList() {
+    LOGGER.info("Inside fetchDepartmentList of Department controller");
+    return departmentService.fetchDepartmentList(); // no input b/c sending all data back
+}
+```
+
+Use Insomnia to hit the save dept and get all depts again and you get the below output.
+
+output
+```
+2023-08-27T22:41:19.883-04:00  INFO 11956 --- [nio-8082-exec-1] c.h.S.t.controller.DepartmentController  : Inside saveDepartment of Department controller
+2023-08-27T22:41:49.731-04:00  INFO 11956 --- [nio-8082-exec-2] c.h.S.t.controller.DepartmentController  : Inside fetchDepartmentList of Department controller
+```
