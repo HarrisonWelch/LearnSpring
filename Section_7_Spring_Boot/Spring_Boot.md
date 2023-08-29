@@ -155,6 +155,8 @@ Switch to `@GetMapping("/")` which is simplified of the previous thing.
 
 Go back to start.spring.io and add the dependency. Use explore to pull the correct text.
 
+share link: https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.1.3&packaging=jar&jvmVersion=11&groupId=com.harrison&artifactId=Spring-boot-tutorial&name=Spring-boot-tutorial&description=Demo%20project%20for%20Spring%20Boot&packageName=com.harrison.Springboot.tutorial&dependencies=web,h2,devtools
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -796,3 +798,91 @@ output
 2023-08-27T22:41:19.883-04:00  INFO 11956 --- [nio-8082-exec-1] c.h.S.t.controller.DepartmentController  : Inside saveDepartment of Department controller
 2023-08-27T22:41:49.731-04:00  INFO 11956 --- [nio-8082-exec-2] c.h.S.t.controller.DepartmentController  : Inside fetchDepartmentList of Department controller
 ```
+
+## Project Lombok
+
+Create a lot of POJOs plain old java objects
+
+Lombok removes boilerplate
+
+Go back to https://start.spring.io/
+
+Search for Lombok and add it
+
+Then grab the pom.xml from the explore button and move it into intellij
+
+Copy paste this into the pom.xml of our project
+
+```xml
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <optional>true</optional>
+</dependency>
+```
+
+Also grab the plugin here. Note the old plugin should be removed. The entire build tag will look like this:
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <excludes>
+                    <exclude>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+You can also search inside IntelliJs plugin manager in the Settings menu
+
+![lombok_already_installed screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/lombok_already_installed.png)
+
+Change department to this
+
+```java
+package com.harrison.Springboot.tutorial.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data // From Lombok
+//@Getter
+//@Setter // Can also use these for just the pieces you want
+@NoArgsConstructor // Default constructor added
+@AllArgsConstructor // All fields used constructor
+@Builder // Add a builder pattern
+public class Department {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long departmentID;
+
+    @NotBlank(message = "Please Add Department Name") // Error message given if blank
+    private String departmentName;
+    private String departmentAddress;
+    private String departmentCode;
+}
+```
+
+Annotations guide it all through Lombok
+
+## Exception Handling 
+
+
