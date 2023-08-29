@@ -1059,4 +1059,20 @@ mysql_table_test
 
 ![mysql_table_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/mysql_table_test.png)
 
+## Unit Testing
+
+Every application should do unit testing
+
+Integration testing in the end to end flow
+
+Test individual components
+
+Concept of mocking for unit testing
+
+Why Mocking?
+
+Consider testing the controller layer, now you are just testing the controller layer not how the data has flowed in from the service layer. Yet its still dependent on that service layer. This is called mocking.
+
+## Unit Testing - Service Layer
+
 
