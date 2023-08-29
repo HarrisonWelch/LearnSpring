@@ -885,4 +885,123 @@ Annotations guide it all through Lombok
 
 ## Exception Handling 
 
+Throw an exception by asking the get all departments to get an ID that does not exist. Example:
 
+![insomnia_exception_example screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_exception_example.png)
+
+Create a new package for error in the tree. Same level as controller, etc.
+
+DepartmentNotFoundException
+```java
+package com.harrison.Springboot.tutorial.error;
+
+public class DepartmentNotFoundException extends Exception {
+    public DepartmentNotFoundException() {
+        super();
+    }
+
+    public DepartmentNotFoundException(String message) {
+        super(message);
+    }
+
+    public DepartmentNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public DepartmentNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    protected DepartmentNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
+}
+```
+
+Then in the department service impl. Get the optional, detect if present, error if not, return if good.
+
+```java
+@Override
+public Department fetchDepartmentById(Long departmentId) throws DepartmentNotFoundException {
+    Optional<Department> department = departmentRepository.findById(departmentId); // Have to use get b/c it's an optional
+
+    if (!department.isPresent()) {
+        throw new DepartmentNotFoundException("Department Not Available");
+    }
+
+    return department.get();
+}
+```
+
+IntelliJ should add the throws itself, then ask to put it on the service interface used.
+
+```java
+public Department fetchDepartmentById(Long departmentId) throws DepartmentNotFoundException;
+```
+
+Then the department controller needs to have the throws added as well.
+
+```java
+@GetMapping("/departments/{id}") // path variable
+public Department fetchDepartmentById(@PathVariable("id") Long departmentId) throws DepartmentNotFoundException {
+    return departmentService.fetchDepartmentById(departmentId);
+}
+```
+
+Now we get a meaningful error like so:
+
+![insomnia_better_exception_example screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_better_exception_example.png)
+
+But we still don't want the gargled mess.
+
+We need a class for sending the exception back for the error thrown.
+
+Define a new class `RestResponseEntityExceptionHandler` which can better handle when our custom exception fires.
+
+```java
+package com.harrison.Springboot.tutorial.error;
+
+import com.harrison.Springboot.tutorial.entity.ErrorMessage;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+@ControllerAdvice // Currently for all entities, will run with exception
+@ResponseStatus
+public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(DepartmentNotFoundException.class)
+    public ResponseEntity<ErrorMessage> departmentNotFoundException(DepartmentNotFoundException exception, WebRequest request){
+        ErrorMessage message = new ErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+    }
+}
+```
+
+And we define a new ErrorMessage class
+
+```java
+package com.harrison.Springboot.tutorial.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ErrorMessage {
+
+    private HttpStatus status;
+    private String message; // error message
+}
+```
+
+![insomnia_even_better_exception_example screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_even_better_exception_example.png)
+
+## Changing H2 over to MySQL
