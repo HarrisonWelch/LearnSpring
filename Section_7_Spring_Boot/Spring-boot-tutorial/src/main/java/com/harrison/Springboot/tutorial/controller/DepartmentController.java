@@ -40,22 +40,26 @@ public class DepartmentController {
 
     @GetMapping("/departments/{id}") // path variable
     public Department fetchDepartmentById(@PathVariable("id") Long departmentId) throws DepartmentNotFoundException {
+        LOGGER.info("Inside fetchDepartmentById of Department controller");
         return departmentService.fetchDepartmentById(departmentId);
     }
 
     @DeleteMapping("/departments/{id}")
     public String deleteDepartmentById(@PathVariable("id") Long departmentId) {
+        LOGGER.info("Inside deleteDepartmentById of Department controller");
         departmentService.deleteDepartmentById(departmentId);
         return "Department deleted successfully";
     }
 
     @PutMapping("/departments/{id}")
     public Department updateDepartment(@PathVariable("id") Long departmentId, @RequestBody Department department) {
+        LOGGER.info("Inside updateDepartment of Department controller");
         return departmentService.updateDepartment(departmentId, department);
     }
 
     @GetMapping("/department/name/{name}")
     public Department fetchDepartmentByName(@PathVariable("name") String departmentName) {
+        LOGGER.info("Inside fetchDepartmentByName of Department controller");
         return departmentService.fetchDepartmentByName(departmentName);
     }
 

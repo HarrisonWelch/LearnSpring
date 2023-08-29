@@ -1005,3 +1005,58 @@ public class ErrorMessage {
 ![insomnia_even_better_exception_example screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/insomnia_even_better_exception_example.png)
 
 ## Changing H2 over to MySQL
+
+Download MySQL workbench
+
+https://dev.mysql.com/downloads/workbench/
+
+I used the Windows installer and just installed everything and left all settings to default. Note - remember your password.
+
+Now change the `application.properties`
+
+```properties
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:mysql://localhost:3306/dcbapp
+spring.datasource.username=root
+spring.datasource.password=password
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+
+# queries in the log
+spring.jpa.show-sql: true
+```
+
+Now add mysql driver in pom.xml
+
+```xml
+<dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
+We have to add the scheme `dcbapp` now
+
+Right click -> Create Schema
+
+![mysql_dcbapp screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/mysql_dcbapp.png)
+
+No tables in the beginning
+
+Start application and they should populate
+
+Note: logs should table create
+
+![mysql_table_create screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/mysql_table_create.png)
+
+Run the create dept insomnia then do a quick test on the DB.
+
+```sql
+SELECT * FROM dcbapp.department
+```
+
+mysql_table_test
+
+![mysql_table_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/mysql_table_test.png)
+
+
