@@ -5,9 +5,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class SpringBootTutorialApplicationTests {
+	// Service Layer
 
-	@Test
-	void contextLoads() {
-	}
+	// Repository Layer
 
+	// Controller Layer
 }
