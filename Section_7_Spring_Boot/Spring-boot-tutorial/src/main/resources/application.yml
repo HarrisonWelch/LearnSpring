@@ -43,6 +43,12 @@ spring:
 welcome:
   message: Welcome to Daily Code Buffer from yml!!
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
 ---
 
 spring:

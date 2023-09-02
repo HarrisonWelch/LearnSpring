@@ -1631,3 +1631,243 @@ After running the app the dept table should appear. After running a save dept co
 
 ## Springboot Actuator
 
+When we deploy we also have to monitor. Springboot Actuator add function to let us monitor.
+
+Add dependency. - https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator
+
+```xml
+<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+Included is `spring-boot-actuator-autoconfigure` so it configures for us. and `micrometer-core` to help with matricies.
+
+Run app to see what the default configuration has.
+
+Test if app loading by going to [localhost:8082](http://localhost:8082/)
+
+logs talk about the exposed endpoints
+
+```
+2023-09-02T16:31:39.265-04:00  INFO 9988 --- [  restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+```
+
+Go to http://localhost:8082/actuator
+
+We get a JSON back
+
+```json
+{
+  "_links": {
+    "self": {
+      "href": "http://localhost:8082/actuator",
+      "templated": false
+    },
+    "health-path": {
+      "href": "http://localhost:8082/actuator/health/{*path}",
+      "templated": true
+    },
+    "health": {
+      "href": "http://localhost:8082/actuator/health",
+      "templated": false
+    }
+  }
+}
+```
+
+We see that we also have health path. Go to http://localhost:8082/actuator/health.
+
+We get back a JSON that says the health path is UP. Good!
+```json
+{
+  "status": "UP"
+}
+```
+
+Tutorial also talks about info endpoint http://localhost:8082/actuator/info but this is broken for me currently.
+
+Springboot can enable and disable these things, add info etc.
+
+Currently using the web over JMX for simplicity.
+
+Set this up for your qa profile underneath all the other items. Same page.
+```yml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+```
+
+Run the app again and see now there are 13 endpoints open for the actuator:
+```
+2023-09-02T16:44:23.168-04:00  INFO 19332 --- [  restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 13 endpoint(s) beneath base path '/actuator'
+```
+
+Refresh the page:
+
+```json
+{
+  "_links": {
+    "self": {
+      "href": "http://localhost:8082/actuator",
+      "templated": false
+    },
+    "beans": {
+      "href": "http://localhost:8082/actuator/beans",
+      "templated": false
+    },
+    "caches-cache": {
+      "href": "http://localhost:8082/actuator/caches/{cache}",
+      "templated": true
+    },
+    "caches": {
+      "href": "http://localhost:8082/actuator/caches",
+      "templated": false
+    },
+    "health": {
+      "href": "http://localhost:8082/actuator/health",
+      "templated": false
+    },
+    "health-path": {
+      "href": "http://localhost:8082/actuator/health/{*path}",
+      "templated": true
+    },
+    "info": {
+      "href": "http://localhost:8082/actuator/info",
+      "templated": false
+    },
+    "conditions": {
+      "href": "http://localhost:8082/actuator/conditions",
+      "templated": false
+    },
+    "configprops": {
+      "href": "http://localhost:8082/actuator/configprops",
+      "templated": false
+    },
+    "configprops-prefix": {
+      "href": "http://localhost:8082/actuator/configprops/{prefix}",
+      "templated": true
+    },
+    "env": {
+      "href": "http://localhost:8082/actuator/env",
+      "templated": false
+    },
+    "env-toMatch": {
+      "href": "http://localhost:8082/actuator/env/{toMatch}",
+      "templated": true
+    },
+    "loggers": {
+      "href": "http://localhost:8082/actuator/loggers",
+      "templated": false
+    },
+    "loggers-name": {
+      "href": "http://localhost:8082/actuator/loggers/{name}",
+      "templated": true
+    },
+    "heapdump": {
+      "href": "http://localhost:8082/actuator/heapdump",
+      "templated": false
+    },
+    "threaddump": {
+      "href": "http://localhost:8082/actuator/threaddump",
+      "templated": false
+    },
+    "metrics": {
+      "href": "http://localhost:8082/actuator/metrics",
+      "templated": false
+    },
+    "metrics-requiredMetricName": {
+      "href": "http://localhost:8082/actuator/metrics/{requiredMetricName}",
+      "templated": true
+    },
+    "scheduledtasks": {
+      "href": "http://localhost:8082/actuator/scheduledtasks",
+      "templated": false
+    },
+    "mappings": {
+      "href": "http://localhost:8082/actuator/mappings",
+      "templated": false
+    }
+  }
+}
+```
+
+Next look at the your environments. http://localhost:8082/actuator/env. Truncated here to save space (~500 lines formatted)
+
+```JSON
+{
+  "activeProfiles": [
+    "qa"
+  ],
+  "propertySources": [
+    {
+      "name": "server.ports",
+      "properties": {
+        "local.server.port": {
+          "value": "******"
+        }
+      }
+    },
+    {
+      "name": "servletContextInitParams",
+      "properties": {}
+    },
+    {
+      "name": "systemProperties",
+      "properties": {
+        "java.specification.version": {
+          "value": "******"
+        },
+        "sun.cpu.isalist": {
+          "value": "******"
+        },
+        "sun.jnu.encoding": {
+          "value": "******"
+        },
+    // ...
+      }
+    // ...
+    }
+    // ...
+}
+```
+
+http://localhost:8082/actuator/configprops can tells us the showSql is enabled for example.
+
+```json
+"showSql": {
+    "value": "******",
+    "origin": "class path resource [application.yml] - 42:15"
+},
+```
+
+http://localhost:8082/actuator/beans - show beans available
+
+Example - departmentRepository is listed amoung the other 362 beans
+* contexts.application.beans array
+```json
+// ...
+"departmentRepository": {
+    "aliases": [],
+    "scope": "singleton",
+    "type": "com.harrison.Springboot.tutorial.repository.DepartmentRepository",
+    "resource": "com.harrison.Springboot.tutorial.repository.DepartmentRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration",
+    "dependencies": [
+    "jpa.named-queries#0",
+    "jpa.DepartmentRepository.fragments#0",
+    "jpaSharedEM_entityManagerFactory",
+    "jpaMappingContext"
+    ]
+},
+// ...
+```
+
+No cache enables
+
+Loggers are here for everything.. http://localhost:8082/actuator/loggers
+
+A lot of enpoints to build a monitor service.
