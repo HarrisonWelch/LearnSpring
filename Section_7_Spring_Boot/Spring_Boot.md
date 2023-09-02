@@ -1334,4 +1334,79 @@ public class HelloController {
 
 ## Adding application.yml
 
+* Why yml? - human readable, reduce duplicate values
+
+for example `spring.datasource` is repeated
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/dcbapp
+spring.datasource.username=root
+```
+
+Good format and widely adopted
+* AWS
+* Docker
+* etc
+
+Plugins available to convert application.properties to yml config files.
+
+```properties
+server.port = 8082
+```
+
+Becomes
+
+```yml
+server:
+  port: 8082
+```
+
+Indentation is **very** important
+
+Use a "properties to yml" online converter like: https://www.javainuse.com/app2yaml. Paste in the props and hit submit.
+
+so now this
+
+```properties
+server.port = 8082
+some.config = Some Configuration Data
+welcome.message = Welcome to Daily Code Buffer!!
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:mysql://localhost:3306/dcbapp
+spring.datasource.username=root
+spring.datasource.password=Bingbong123$
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.jpa.show-sql: true
+```
+
+Turns to this
+```yml
+server:
+  port: 8082
+some:
+  config: Some Configuration Data
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    password: Bingbong123$
+    url: jdbc:mysql://localhost:3306/dcbapp
+    username: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+welcome:
+  message: Welcome to Daily Code Buffer from yml!!
+```
+
+With no redundant text.
+
+Comment everything out of the application.properties file `Ctrl+/`.
+
+Spring will now load from the application.yml automatically.
+
+![yml_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/yml_test.png)
+
+## Springboot profiles
+
+
 
