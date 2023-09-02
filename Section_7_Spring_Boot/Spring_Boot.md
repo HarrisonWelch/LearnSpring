@@ -1970,3 +1970,127 @@ We can add future items to what is passed back in the future.
 
 ## Exclude Actuator Endpoint
 
+Let's hide the beans created for example
+
+Change the yml qa profile management to add the exclude tag
+
+```yml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: "env,beans"
+```
+
+Restart app
+
+logs say only 12 endpoints now instead of 14
+
+```
+2023-09-02T17:35:13.982-04:00  INFO 32136 --- [  restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 12 endpoint(s) beneath base path '/actuator'
+```
+
+http://localhost:8082/actuator - give back:
+```json
+{
+  "_links": {
+    "self": {
+      "href": "http://localhost:8082/actuator",
+      "templated": false
+    },
+    "features-featureName": {
+      "href": "http://localhost:8082/actuator/features/{featureName}",
+      "templated": true
+    },
+    "features": {
+      "href": "http://localhost:8082/actuator/features",
+      "templated": false
+    },
+    "caches-cache": {
+      "href": "http://localhost:8082/actuator/caches/{cache}",
+      "templated": true
+    },
+    "caches": {
+      "href": "http://localhost:8082/actuator/caches",
+      "templated": false
+    },
+    "health": {
+      "href": "http://localhost:8082/actuator/health",
+      "templated": false
+    },
+    "health-path": {
+      "href": "http://localhost:8082/actuator/health/{*path}",
+      "templated": true
+    },
+    "info": {
+      "href": "http://localhost:8082/actuator/info",
+      "templated": false
+    },
+    "conditions": {
+      "href": "http://localhost:8082/actuator/conditions",
+      "templated": false
+    },
+    "configprops": {
+      "href": "http://localhost:8082/actuator/configprops",
+      "templated": false
+    },
+    "configprops-prefix": {
+      "href": "http://localhost:8082/actuator/configprops/{prefix}",
+      "templated": true
+    },
+    "loggers": {
+      "href": "http://localhost:8082/actuator/loggers",
+      "templated": false
+    },
+    "loggers-name": {
+      "href": "http://localhost:8082/actuator/loggers/{name}",
+      "templated": true
+    },
+    "heapdump": {
+      "href": "http://localhost:8082/actuator/heapdump",
+      "templated": false
+    },
+    "threaddump": {
+      "href": "http://localhost:8082/actuator/threaddump",
+      "templated": false
+    },
+    "metrics": {
+      "href": "http://localhost:8082/actuator/metrics",
+      "templated": false
+    },
+    "metrics-requiredMetricName": {
+      "href": "http://localhost:8082/actuator/metrics/{requiredMetricName}",
+      "templated": true
+    },
+    "scheduledtasks": {
+      "href": "http://localhost:8082/actuator/scheduledtasks",
+      "templated": false
+    },
+    "mappings": {
+      "href": "http://localhost:8082/actuator/mappings",
+      "templated": false
+    }
+  }
+}
+```
+
+Notice env and beans are not there. Use Ctrl+F to try, not there!
+
+This how we disable endpoints
+
+# Wrapping up
+
+Good to go make production application
+
+We saw
+* diff annocation in spring boots and how to use
+* Dif endpoints available
+* How to save them in the DB
+* How to change config in the config prop file
+* Unit testing
+* Service testing
+* Controller testing
+* Repository testing
+* Different Spring profile
+* Carry itmes to YML config
