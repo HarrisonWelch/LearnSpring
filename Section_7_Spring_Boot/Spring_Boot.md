@@ -1871,3 +1871,102 @@ No cache enables
 Loggers are here for everything.. http://localhost:8082/actuator/loggers
 
 A lot of enpoints to build a monitor service.
+
+## Customer Actuator 
+
+Override any of the endpoints. Add details in the endpoint. Or expose a new endpoint.
+
+Make a new pckg config. 
+
+Make a class to represent this new Actuate endpoint.
+
+```java
+package com.harrison.Springboot.tutorial.config;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.boot.actuate.endpoint.annotation.Selector;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Component
+@Endpoint(id = "features") // Part of SB Actuate
+public class FeatureEndpoint {
+
+    private final Map<String, Feature> featuresMap = new ConcurrentHashMap<>();
+
+    public FeatureEndpoint() {
+        featuresMap.put("Department", new Feature(true));
+        featuresMap.put("User", new Feature(false)); // false b/c not impl
+        featuresMap.put("Authentication", new Feature(false)); // false b/c not impl
+    }
+
+    // Send feat back when called
+    @ReadOperation // write and delete op also exist
+    public Map<String, Feature> features() {
+        return featuresMap;
+    }
+
+    @ReadOperation
+    public Feature feature(@Selector String featureName) {
+        return featuresMap.get(featureName);
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class Feature {
+        private boolean isEnabled;
+    }
+}
+
+```
+
+Now there are 14 endpoints.
+
+Our new endpoints seen here - http://localhost:8082/actuator
+
+```json
+"features-featureName": {
+    "href": "http://localhost:8082/actuator/features/{featureName}",
+    "templated": true
+},
+"features": {
+    "href": "http://localhost:8082/actuator/features",
+    "templated": false
+},
+```
+
+Go to features and you see
+
+```json
+{
+  "Department": {
+    "enabled": true
+  },
+  "User": {
+    "enabled": false
+  },
+  "Authentication": {
+    "enabled": false
+  }
+}
+```
+
+For the `features/{featureName}` endpoint we can pass the name like so - http://localhost:8082/actuator/features/Department
+
+```json
+{
+"enabled": true
+}
+```
+
+We can add future items to what is passed back in the future.
+
+## Exclude Actuator Endpoint
+
