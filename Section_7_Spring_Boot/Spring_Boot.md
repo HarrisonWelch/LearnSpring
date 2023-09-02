@@ -1416,11 +1416,19 @@ Create multiple
 ```yml
 server:
   port: 8082
+welcome:
+  message: Welcome to Daily Code Buffer from yml!!
+
+spring:
+  profiles:
+    active: qa
 
 ---
 
 spring:
-  profiles: dev
+  config:
+    activate:
+      on-profile: dev
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     password: Bingbong123$
@@ -1436,7 +1444,9 @@ welcome:
 ---
 
 spring:
-  profiles: qa
+  config:
+    activate:
+      on-profile: qa
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     password: Bingbong123$
@@ -1452,7 +1462,9 @@ welcome:
 ---
 
 spring:
-  profiles: prod
+  config:
+    activate:
+      on-profile: prod
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     password: Bingbong123$
@@ -1464,7 +1476,6 @@ spring:
     show-sql: true
 welcome:
   message: Welcome to Daily Code Buffer from yml!!
-
 ```
 
 We set active profile like so:
@@ -1515,4 +1526,108 @@ Use insomnia to make some depts
 
 For production you wont be doing this, you create a Jar file and running it.
 
-## Running SpringBoot with multiple Profiles
+## Running SpringBoot with multiple profiles
+
+Create a jar file
+
+Change your pom.xml file verison to `1.0.0` instead of `0.0.1-SNAPSHOT`
+```xml
+<version>1.0.0</version>
+```
+
+Note: I did not have access to `mvn clean install` so I have to install it from this guide: https://phoenixnap.com/kb/install-maven-windows. I also added JAVA_HOME and added that to the path while I was here.
+
+I used the jdk from the IntelliJ setup
+
+Java Home like this
+
+![JAVA_HOME screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/JAVA_HOME.png)
+
+Maven Home like this
+
+![MAVEN_HOME screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/MAVEN_HOME.png)
+
+And System Path like this
+
+![Path screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/Path.png)
+
+Note: this is all `System variables` not `User variables for <user>`
+
+Restart IntelliJ
+
+Next go to the terminal and use `mvn clean install`
+
+```
+stall
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.harrison:Spring-boot-tutorial >------------------
+[INFO] Building Spring-boot-tutorial 1.0.0
+[INFO]   from pom.xml
+
+...
+
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.687 s - in com.harrison.Springboot.tutorial.service.DepartmentServiceTest
+[INFO] 
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+...
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.295 s
+[INFO] Finished at: 2023-09-02T15:56:25-04:00
+[INFO] ------------------------------------------------------------------------
+```
+
+Note it runs tests for us. Now we are ready to go with the deployment.
+
+```
+cd target
+```
+
+Then use `ls`
+```
+PS C:\Users\...\Spring-boot-tutorial\target> dir
+
+
+    Directory: C:\Users\...\Spring-boot-tutorial\target
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----          9/2/2023   3:56 PM                classes
+d-----          9/2/2023   3:56 PM                generated-sources
+d-----          9/2/2023   3:56 PM                generated-test-sources
+d-----          9/2/2023   3:56 PM                maven-archiver
+da---l          9/2/2023   3:56 PM                maven-status
+da---l          9/2/2023   3:56 PM                surefire-reports
+d-----          9/2/2023   3:56 PM                test-classes
+-a----          9/2/2023   3:56 PM       48868823 Spring-boot-tutorial-1.0.0.jar
+-a----          9/2/2023   3:56 PM          15418 Spring-boot-tutorial-1.0.0.jar.original
+
+```
+
+`Spring-boot-tutorial-1.0.0.jar` is what we are interested in.
+
+Now we run our jar
+
+```shell
+java -jar Spring-boot-tutorial-1.0.0.jar --spring.profiles.active=prod
+```
+
+We use command line arg `--spring.profiles.active` to set the profile to `prod`
+
+The java program should run as normal now. The logs will say it's using the prod profile
+
+```
+2023-09-02T16:02:51.981-04:00  INFO 37776 --- [           main] c.h.S.t.SpringBootTutorialApplication    : The following 1 profile is active: "prod"
+```
+
+After running the app the dept table should appear. After running a save dept command in insomnia.
+![prod_db screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/prod_db.png)
+
+## Springboot Actuator
+
