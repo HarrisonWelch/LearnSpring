@@ -1275,3 +1275,63 @@ class DepartmentControllerTest {
 ```
 
 ## Adding config in properies file
+
+Add configs in your config app properties.
+
+```properties
+server.port = 8082
+# Documentation available for each property
+
+## Add your own configuration
+
+some.config = Some Configuration Data
+# Hello Controller
+welcome.message = Welcome to Daily Code Buffer!!
+# Now you just change the value here and the code will adjust
+
+#spring.h2.console.enabled=true
+#spring.datasource.url=jdbc:h2:mem:dcbapp
+#spring.datasource.driverClassName=org.h2.Driver
+#spring.datasource.username=sa
+#spring.datasource.password=password
+#spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:mysql://localhost:3306/dcbapp
+spring.datasource.username=root
+spring.datasource.password=Bingbong123$
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+
+# Queries in the log
+spring.jpa.show-sql: true
+```
+
+Then we can use them in the HelloController (viewed when going to http://localhost:8082/ with the application live)
+
+```java
+package com.harrison.Springboot.tutorial.controller;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController // Component of a particular type, component is added by this annotation
+public class HelloController {
+
+    @Value("${welcome.message}") // fetch from application.properties and make this var equal to it
+    private String welcomeMessage;
+
+    @GetMapping("/") // Very simple now
+    public String helloWorld() {
+        return welcomeMessage;
+    }
+}
+```
+
+`@Value` can also sepcifiy what prop file you want to take from. The annotation comes from SpringBoot.
+
+## Adding application.yml
+
+
