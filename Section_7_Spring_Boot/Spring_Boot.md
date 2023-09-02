@@ -1408,5 +1408,111 @@ Spring will now load from the application.yml automatically.
 
 ## Springboot profiles
 
+We have the department service manager. Now we need to deploy with __different__ config properties. All the different target deploy environments need different properties. We achieve this with Springboot profiles.
 
+yml can make multiple docs in the same file. Three hyphens separates `---`
 
+Create multiple 
+```yml
+server:
+  port: 8082
+
+---
+
+spring:
+  profiles: dev
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    password: Bingbong123$
+    url: jdbc:mysql://localhost:3306/dcbapp
+    username: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+welcome:
+  message: Welcome to Daily Code Buffer from yml!!
+
+---
+
+spring:
+  profiles: qa
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    password: Bingbong123$
+    url: jdbc:mysql://localhost:3306/dcbapp-qa
+    username: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+welcome:
+  message: Welcome to Daily Code Buffer from yml!!
+
+---
+
+spring:
+  profiles: prod
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    password: Bingbong123$
+    url: jdbc:mysql://localhost:3306/dcbapp-prod
+    username: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+welcome:
+  message: Welcome to Daily Code Buffer from yml!!
+
+```
+
+We set active profile like so:
+
+```yml
+spring:
+  profiles:
+    active: qa
+```
+
+But we don't have `dcbapp-qa` schema on our MySQL db
+
+So you'll get an error on app boot like so:
+```
+Loading class `com.mysql.jdbc.Driver'. This is deprecated. The new driver class is `com.mysql.cj.jdbc.Driver'. The driver is automatically registered via the SPI and manual loading of the driver class is generally unnecessary.
+2023-09-02T14:55:44.026-04:00 ERROR 32512 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Exception during pool initialization.
+
+java.sql.SQLSyntaxErrorException: Unknown database 'dcbapp-qa'
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:121) ~[mysql-connector-j-8.0.33.jar:8.0.33]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.0.33.jar:8.0.33]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:825) ~[mysql-connector-j-8.0.33.jar:8.0.33]
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:446) ~[mysql-connector-j-8.0.33.jar:8.0.33]
+...
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2023-09-02T14:55:45.074-04:00 ERROR 32512 --- [  restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment] due to: Unable to determine Dialect without JDBC metadata (please set 'javax.persistence.jdbc.url', 'hibernate.connection.url', or 'hibernate.dialect')
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1770) ~[spring-beans-6.0.11.jar:6.0.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:598) ~[spring-beans-6.0.11.jar:6.0.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520) ~[spring-beans-6.0.11.jar:6.0.11]
+...
+```
+
+Note the profile is loaded up at the top:
+```
+2023-09-02T14:55:42.679-04:00  INFO 32512 --- [  restartedMain] c.h.S.t.SpringBootTutorialApplication    : The following 1 profile is active: "qa"
+```
+
+So lets create this DB (qa) and the prod DB (qa)
+
+![create_qa_prod_schema screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/create_qa_prod_schema.png)
+
+Restarting the app with the qa DB built will make the department table as expected.
+
+Use insomnia to make some depts
+
+![qa_db screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/qa_db.png)
+
+For production you wont be doing this, you create a Jar file and running it.
+
+## Running SpringBoot with multiple Profiles
