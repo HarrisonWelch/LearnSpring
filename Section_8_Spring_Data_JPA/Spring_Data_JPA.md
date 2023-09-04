@@ -645,3 +645,37 @@ student = Student(studentId=1, firstName=Shabbir, lastName=Dawoodi, emailId=shab
 
 ## `@Transactional` & `@Modifying` Annotation
 
+* Method to update the record
+* Update the first name of the student by email id
+
+StudentRepository.java:
+```java
+@Modifying // We are going to modify data
+@Transactional // We need to open a transaction and commit things at the end. Only on success, else rollback.
+@Query(
+        value = "update tbl_student set first_name = ?1 where email_address = ?2",
+        nativeQuery = true
+)
+public int updateStudentNameByEmailId(String firstName, String emailId);
+```
+
+StudentRepositoryTest.java
+```java
+@Test
+public void updateStudentNameByEmailIdTest() {
+    studentRepository.updateStudentNameByEmailId(
+            "shabbir dawoodi",
+            "shabbir@gmail.com");
+}
+```
+
+Output
+```
+Hibernate: update tbl_student set first_name = ? where email_address = ?
+```
+
+DB update:
+![jpa_update_by_email screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_update_by_email.png)
+
+We saw a lot on diff DBs and annotations. Time to move on to the JPA relationship
+

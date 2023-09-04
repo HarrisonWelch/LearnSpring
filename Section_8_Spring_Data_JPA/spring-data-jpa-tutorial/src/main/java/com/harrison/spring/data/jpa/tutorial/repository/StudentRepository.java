@@ -1,7 +1,9 @@
 package com.harrison.spring.data.jpa.tutorial.repository;
 
 import com.harrison.spring.data.jpa.tutorial.entity.Student;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -43,5 +45,12 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     )
     public Student getStudentByEmailAddressNativeNamedParam(@Param("emailId") String emailId);
 
+    @Modifying // We are going to modify data
+    @Transactional // We need to open a transaction and commit things at the end. Only on success, else rollback.
+    @Query(
+            value = "update tbl_student set first_name = ?1 where email_address = ?2",
+            nativeQuery = true
+    )
+    public int updateStudentNameByEmailId(String firstName, String emailId);
 
 }
