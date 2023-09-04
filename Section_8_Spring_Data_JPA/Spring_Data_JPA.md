@@ -340,6 +340,7 @@ But I don't want the guardian to be it's own table.
 
 Since we already have the columns deployed we can use an override to get the column names the same.
 
+Guardian.java:
 ```java
 package com.harrison.spring.data.jpa.tutorial.entity;
 
@@ -381,6 +382,7 @@ public class Guardian {
 
 Now we need to fix our tests because we can't use the builder patter method of setting the guardian name.
 
+StudentRepositoryTest.java:
 ```java
     @Test
     public void saveStudent() {
@@ -401,6 +403,7 @@ Now we need to fix our tests because we can't use the builder patter method of s
 And now we need to make a test that includes the guardian like so:
 * Note we added the `@Builder` anno to the Guardian class.
 
+StudentRepositoryTest.java:
 ```java
 
     @Test
@@ -416,7 +419,7 @@ And now we need to make a test that includes the guardian like so:
                 .firstName("Shivam")
                 .emailId("shivam@gmail.com")
                 .lastName("Kumar")
-                .guardian(guardian)
+                .guardian(guardian) // <--- important step
                 .build();
 
         studentRepository.save(student);
@@ -435,3 +438,100 @@ Hibernate: insert into tbl_student (email_address,first_name,guardian_email,guar
 ![jpa_student_with_embed_guardian_was_made screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_student_with_embed_guardian_was_made.png)
 
 ## JPA Repositories Methods
+
+Lets see the diff methods in our student repository
+
+StudentRepository.java:
+```java
+public List<Student> findByFirstName(String firstName); // Jpa does some magic to know you want to search by firstName. Must match casing exactly as needed.
+
+```
+
+Then we use it
+
+StudentRepositoryTest.java:
+```java
+    @Test
+    public void printStudentByFirstName() {
+        List<Student> students = studentRepository.findByFirstName("Shivam");
+        System.out.println("students = " + students);
+    }
+```
+
+Run the test and we can see it works fine:
+```
+Hibernate: select s1_0.student_id,s1_0.email_address,s1_0.first_name,s1_0.guardian_email,s1_0.guardian_mobile,s1_0.guardian_name,s1_0.last_name from tbl_student s1_0 where s1_0.first_name=?
+students = [Student(studentId=2, firstName=Shivam, lastName=Kumar, emailId=shivam@gmail.com, guardian=Guardian(name=Nikhil, email=nikhil@gmail.com, mobile=9999999999))]
+```
+
+Now lets do a `containing` query
+
+
+StudentRepository.java:
+```java
+    public List<Student> findByFirstNameContaining(String name);
+```
+
+Then we use it
+
+StudentRepositoryTest.java:
+```java
+    @Test
+    public void printStudentByFirstNameContaining() {
+        List<Student> students = studentRepository.findByFirstNameContaining("sh");
+        System.out.println("students = " + students);
+    }
+```
+
+Output both records:
+```
+Hibernate: select s1_0.student_id,s1_0.email_address,s1_0.first_name,s1_0.guardian_email,s1_0.guardian_mobile,s1_0.guardian_name,s1_0.last_name from tbl_student s1_0 where s1_0.first_name like ? escape '\\'
+students = [Student(studentId=1, firstName=Shabbir, lastName=Dawoodi, emailId=shabbir@gmail.com, guardian=Guardian(name=Nikhil, email=nikhil@gmail.com, mobile=9999999999)), Student(studentId=2, firstName=Shivam, lastName=Kumar, emailId=shivam@gmail.com, guardian=Guardian(name=Nikhil, email=nikhil@gmail.com, mobile=9999999999))]
+```
+
+JPA did the escape character `'%...%'` for us.
+
+Make these methods
+
+StudentRepository.java:
+```java
+    public List<Student> findByLastNameNotNull(); // Want records which are not null
+
+    public List<Student> findByGuardianName(String guardianName); // Reach into the embed obj
+```
+
+Impl the 2nd method `findByGuardianName`
+
+StudentRepositoryTest.java:
+```java
+    @Test
+    public void printStudentBasedOnGuardianName() {
+        List<Student> students = studentRepository.findByGuardianName("Nikhil");
+        System.out.println("students = " + students);
+    }
+```
+
+Test output:
+
+```
+Hibernate: select s1_0.student_id,s1_0.email_address,s1_0.first_name,s1_0.guardian_email,s1_0.guardian_mobile,s1_0.guardian_name,s1_0.last_name from tbl_student s1_0 where s1_0.guardian_name=?
+students = [Student(studentId=1, firstName=Shabbir, lastName=Dawoodi, emailId=shabbir@gmail.com, guardian=Guardian(name=Nikhil, email=nikhil@gmail.com, mobile=9999999999)), Student(studentId=2, firstName=Shivam, lastName=Kumar, emailId=shivam@gmail.com, guardian=Guardian(name=Nikhil, email=nikhil@gmail.com, mobile=9999999999))]
+
+```
+
+Query and records are coming back fine.
+
+Link to other methods: https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods
+* And - for lastName and firstName
+
+Example:
+
+StudentRepository.java:
+```java
+    public Student findByFirstNameAndLastName(String firstName, String lastName); // Or can also work
+```
+
+* Between is there
+* IgnoreCase is there
+
+# JPA `@Query` Annotation
