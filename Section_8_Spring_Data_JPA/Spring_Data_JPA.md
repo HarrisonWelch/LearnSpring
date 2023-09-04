@@ -247,3 +247,91 @@ public class Student {
 ```
 
 ## Understanding Repositories and Methods
+* As repositories, there are different impl for the different std operations.
+* There are default impls in the Spring Data JPA
+
+Make the StudentRepository
+```java
+package com.harrison.spring.data.jpa.tutorial.repository;
+
+import com.harrison.spring.data.jpa.tutorial.entity.Student;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository // Spring will understand how to use this
+public interface StudentRepository extends JpaRepository<Student, Long> {
+}
+```
+
+Dive into the JpaRepository class to find out what is inherited.
+
+Now generate a test file off that using IntelliJ
+
+```java
+package com.harrison.spring.data.jpa.tutorial.repository;
+
+import com.harrison.spring.data.jpa.tutorial.entity.Student;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest // Note - this will perm impact the DB
+// @DataJpaTest // Normally use this to prevent DB impact. But in our case we want our DB to be impacted.
+class StudentRepositoryTest {
+
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Test
+    public void saveStudent() {
+        // Fetch data and save data is important here
+        Student student = Student.builder()
+                .emailId("shabbir@gmail.com")
+                .firstName("Shabbir")
+                .lastName("Dawoodi")
+                .guardianName("Nikhil")
+                .guardianEmail("nikhil@gmail.com")
+                .guardianMobile("9999999999")
+                .build();
+
+        studentRepository.save(student);
+    }
+
+}
+```
+
+Run the test
+
+```
+Hibernate: select next_val as id_val from student_sequence for update
+Hibernate: update student_sequence set next_val= ? where next_val=?
+Hibernate: insert into tbl_student (email_address,first_name,guardian_email,guardian_mobile,guardian_name,last_name,student_id) values (?,?,?,?,?,?,?)
+```
+
+The DB was affected after completion.
+
+![jpa_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_test.png)
+
+Now a test for fetching all students
+```java
+@Test
+public void printAllStudents() {
+    List<Student> studentList = studentRepository.findAll();
+
+    System.out.println("studentList = " + studentList);
+}
+```
+
+Test output:
+```
+studentList = [Student(studentId=1, firstName=Shabbir, lastName=Dawoodi, emailId=shabbir@gmail.com, guardianName=Nikhil, guardianEmail=nikhil@gmail.com, guardianMobile=9999999999)]
+```
+
+Next section, lets improve this Student class
+
+## `@Embeddable` and `@Embedded`
+
+
