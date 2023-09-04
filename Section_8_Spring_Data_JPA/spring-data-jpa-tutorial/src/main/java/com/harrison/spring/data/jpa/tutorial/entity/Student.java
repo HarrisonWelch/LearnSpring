@@ -39,7 +39,7 @@ public class Student {
             nullable = false
     )
     private String emailId;
-    private String guardianName;
-    private String guardianEmail;
-    private String guardianMobile;
+
+    @Embedded // Put all attrs from Guardian into this class's produced table
+    private Guardian guardian;
 }

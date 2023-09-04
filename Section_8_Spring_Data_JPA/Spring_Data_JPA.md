@@ -334,4 +334,104 @@ Next section, lets improve this Student class
 
 ## `@Embeddable` and `@Embedded`
 
+Ideally the Guardian attributes of the student class need to be a diff class. Lets move them.
 
+But I don't want the guardian to be it's own table.
+
+Since we already have the columns deployed we can use an override to get the column names the same.
+
+```java
+package com.harrison.spring.data.jpa.tutorial.entity;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Embeddable // Can be put into another class
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@AttributeOverrides({
+        @AttributeOverride(
+                name = "name",
+                column = @Column(name = "guardian_name")
+        ),
+        @AttributeOverride(
+                name = "email",
+                column = @Column(name = "guardian_email")
+        ),
+        @AttributeOverride(
+                name = "mobile",
+                column = @Column(name = "guardian_mobile")
+        )
+})
+public class Guardian {
+
+    private String name;
+    private String email;
+    private String mobile;
+}
+```
+
+Now we need to fix our tests because we can't use the builder patter method of setting the guardian name.
+
+```java
+    @Test
+    public void saveStudent() {
+        // Fetch data and save data is important here
+        Student student = Student.builder()
+                .emailId("shabbir@gmail.com")
+                .firstName("Shabbir")
+                .lastName("Dawoodi")
+                //.guardianName("Nikhil")
+                //.guardianEmail("nikhil@gmail.com")
+                //.guardianMobile("9999999999")
+                .build();
+
+        studentRepository.save(student);
+    }
+```
+
+And now we need to make a test that includes the guardian like so:
+* Note we added the `@Builder` anno to the Guardian class.
+
+```java
+
+    @Test
+    public void saveStudentWithGuardian() {
+
+        Guardian guardian = Guardian.builder()
+                .name("Nikhil")
+                .email("nikhil@gmail.com")
+                .mobile("9999999999")
+                .build();
+
+        Student student = Student.builder()
+                .firstName("Shivam")
+                .emailId("shivam@gmail.com")
+                .lastName("Kumar")
+                .guardian(guardian)
+                .build();
+
+        studentRepository.save(student);
+    }
+```
+
+Run the test and you get the same effect on the logs and DB
+
+Log output:
+```
+Hibernate: select next_val as id_val from student_sequence for update
+Hibernate: update student_sequence set next_val= ? where next_val=?
+Hibernate: insert into tbl_student (email_address,first_name,guardian_email,guardian_mobile,guardian_name,last_name,student_id) values (?,?,?,?,?,?,?)
+```
+
+![jpa_student_with_embed_guardian_was_made screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_student_with_embed_guardian_was_made.png)
+
+## JPA Repositories Methods
