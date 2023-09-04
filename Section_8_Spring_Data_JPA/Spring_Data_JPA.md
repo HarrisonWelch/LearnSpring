@@ -25,3 +25,18 @@ ORM
 * JPA is just a sepecification, need to use a framework with an ORM provider (Hibernate or Ibatis)
 
 ## What will we build?
+* Build a small relationship using Spring Data JPA
+* Class diagram below
+* Each class defines a relationship with each other
+* Class has properties
+* Class name = Tables name
+* All table attributes are columns.
+* All records will be rows created
+* Students will have a guardian
+* 1:m from Student to Course
+* 1:1 from Course and Course Material
+* m:m from Teacher to Course
+
+![jpa_what_we_build screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_what_we_build.png)
+
+## Connecting SpringBoot App with DB
