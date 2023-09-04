@@ -45,6 +45,7 @@ ORM
 
 Click this link to auto-import: https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.1.3&packaging=jar&jvmVersion=11&groupId=com.harrison&artifactId=spring-data-jpa-tutorial&name=spring-data-jpa-tutorial&description=Demo%20project%20for%20Spring%20Boot&packageName=com.harrison.spring.data.jpa.tutorial&dependencies=data-jpa,lombok,mysql,web
 
+Table if the link expires:
 | Property      | Setting                                |
 | ------------- | -------------------------------------- |
 | Project       | Maven                                  |
@@ -64,4 +65,29 @@ Then we are going to add
 * MySQL Driver
 * Spring Web
 
+Note: spring-boot-starter-web uses Hibernate as its default impl.
+
+Create schema "schooldb" in MySQL workbench
+
+![school_db_schema screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/school_db_schema.png)
+
+Update the application.properties in main->resources
+
+```properties
+# What ever changes we do in the DB will be reflected in the DB
+# So whatever entity DB updates we do in Java will be reflected
+# Example: Adding a new field to the school object will update on the DB side
+spring.jpa.hibernate.ddl-auto=update
+
+# DB connection
+spring.datasource.url=jdbc:mysql://localhost:3306/schooldb
+spring.datasource.username=root
+spring.datasource.password=Bingbong123$
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+
+# Show query in the logs
+spring.jpa.show-sql: true
+```
+
+## Mapping entities with DB
 
