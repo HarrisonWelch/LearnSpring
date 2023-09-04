@@ -135,5 +135,115 @@ The table was auto-updated
 Camel-case was moved to underscores on the formatting
 
 ## Different JPA annotations
+Note we are using DDL auto update (app.prop) so our DB will auto update
 
+Sometimes this wont work so we need to delete our table. In that case, we delete the table.
 
+Add the anno `@Table(name = "tbl_student")` to change the name of the table
+
+Add the anno `@Column(name = "email_address")` to change the col name away from default
+
+Sequence Generator
+```java
+@SequenceGenerator(
+        name = "student_sequence",
+        sequenceName = "student_sequence",
+        allocationSize = 1
+)
+@GeneratedValue(
+        strategy = GenerationType.SEQUENCE,
+        generator = "student_sequence"
+)
+private long studentId;
+```
+
+Constraints
+* Email must be unique
+
+Add to the `@Table(...)` anno up top
+
+```java
+@Table(
+        name = "tbl_student",
+        uniqueConstraints = @UniqueConstraint(
+                name = "emailid_unique",
+                columnNames = "email_address"
+        )
+)
+```
+
+Non-null columns
+
+Change the column anno to this for the emailId variable
+
+```java
+@Column(
+        name = "email_address", // Change default name from email_id to email_address
+        nullable = false
+)
+private String emailId;
+```
+
+We can see the tables and constraints being made
+```
+Hibernate: create table student_sequence (next_val bigint) engine=InnoDB
+Hibernate: insert into student_sequence values ( 1 )
+Hibernate: create table tbl_student (student_id bigint not null, email_address varchar(255) not null, first_name varchar(255), guardian_email varchar(255), guardian_mobile varchar(255), guardian_name varchar(255), last_name varchar(255), primary key (student_id)) engine=InnoDB
+Hibernate: alter table tbl_student drop index emailid_unique
+Hibernate: alter table tbl_student add constraint emailid_unique unique (email_address)
+```
+
+![jpa_tbl_student screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_tbl_student.png)
+
+Note: We can delete the table for student to make sure we only generate one and use just that one.
+
+`Student.java` class right now:
+```java
+package com.harrison.spring.data.jpa.tutorial.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity // Now our changes will reflect in the DB
+@Data // All getter and setter are generated
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder // Builder pattern
+@Table(
+        name = "tbl_student",
+        uniqueConstraints = @UniqueConstraint(
+                name = "emailid_unique",
+                columnNames = "email_address"
+        )
+)
+public class Student {
+
+    @Id // Primary key
+    @SequenceGenerator(
+            name = "student_sequence",
+            sequenceName = "student_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "student_sequence"
+    )
+    private long studentId;
+    private String firstName;
+    private String lastName;
+
+    @Column(
+            name = "email_address", // Change default name from email_id to email_address
+            nullable = false
+    )
+    private String emailId;
+    private String guardianName;
+    private String guardianEmail;
+    private String guardianMobile;
+}
+```
+
+## Understanding Repositories and Methods
