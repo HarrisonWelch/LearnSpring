@@ -587,4 +587,31 @@ firstName = Shivam
 
 ## Native Queries Example
 
+Used when executing complex queries. Example for proof of concepts.
 
+StudentRepository.java:
+```java
+// Native query
+@Query(
+        value = "SELECT * FROM tbl_student s where s.email_address = ?1",
+        nativeQuery = true
+)
+public Student getStudentByEmailAddressNative(String emailId);
+```
+
+StudentRepositoryTest.java
+```java
+@Test
+public void printGetStudentByEmailAddressNative() {
+    Student student = studentRepository.getStudentByEmailAddressNative("shabbir@gmail.com");
+    System.out.println("student = " + student);
+}
+```
+
+Output
+```
+Hibernate: SELECT * FROM tbl_student s where s.email_address = ?
+student = Student(studentId=1, firstName=Shabbir, lastName=Dawoodi, emailId=shabbir@gmail.com, guardian=Guardian(name=Nikhil, email=nikhil@gmail.com, mobile=9999999999))
+```
+
+## Query Named Params
