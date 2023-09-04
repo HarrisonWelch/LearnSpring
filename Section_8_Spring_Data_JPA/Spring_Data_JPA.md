@@ -91,3 +91,49 @@ spring.jpa.show-sql: true
 
 ## Mapping entities with DB
 
+Create package `entity`
+
+Create class Student
+
+```java
+package com.harrison.spring.data.jpa.tutorial.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity // Now our changes will reflect in the DB
+@Data // All getter and setter are generated
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder // Builder pattern
+public class Student {
+
+    @Id // Primary key
+    private long studentId;
+    private String firstName;
+    private String lastName;
+    private String emailId;
+    private String guardianName;
+    private String guardianMobile;
+}
+```
+
+Nothing before app run. Now lets run and see the HQL take over.
+
+```
+Hibernate: create table student (student_id bigint not null, email_id varchar(255), first_name varchar(255), guardian_mobile varchar(255), guardian_name varchar(255), last_name varchar(255), primary key (student_id)) engine=InnoDB
+```
+
+The table was auto-updated
+
+![jpa_student_was_made screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_student_was_made.png)
+
+Camel-case was moved to underscores on the formatting
+
+## Different JPA annotations
+
+
