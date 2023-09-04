@@ -4,12 +4,9 @@ import com.harrison.spring.data.jpa.tutorial.entity.Guardian;
 import com.harrison.spring.data.jpa.tutorial.entity.Student;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest // Note - this will perm impact the DB
 // @DataJpaTest // Normally use this to prevent DB impact. But in our case we want our DB to be impacted.
@@ -91,6 +88,12 @@ class StudentRepositoryTest {
     @Test
     public void printGetStudentByEmailAddressNative() {
         Student student = studentRepository.getStudentByEmailAddressNative("shabbir@gmail.com");
+        System.out.println("student = " + student);
+    }
+
+    @Test
+    public void printGetStudentByEmailAddressNativeNamedParam() {
+        Student student = studentRepository.getStudentByEmailAddressNativeNamedParam("shabbir@gmail.com");
         System.out.println("student = " + student);
     }
 

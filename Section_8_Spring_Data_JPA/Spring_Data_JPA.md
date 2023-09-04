@@ -615,3 +615,33 @@ student = Student(studentId=1, firstName=Shabbir, lastName=Dawoodi, emailId=shab
 ```
 
 ## Query Named Params
+* To stop passing the question marks `?1`, `?2`, etc.
+* Good for labeling
+
+StudentRepository.java:
+```java
+// Native Named Param
+@Query(
+        value = "SELECT * FROM tbl_student s where s.email_address = :emailId",
+        nativeQuery = true
+)
+public Student getStudentByEmailAddressNativeNamedParam(@Param("emailId") String emailId);
+```
+
+StudentRepositoryTest.java
+```java
+@Test
+public void printGetStudentByEmailAddressNativeNamedParam() {
+    Student student = studentRepository.getStudentByEmailAddressNativeNamedParam("shabbir@gmail.com");
+    System.out.println("student = " + student);
+}
+```
+
+Output
+```
+Hibernate: SELECT * FROM tbl_student s where s.email_address = ?
+student = Student(studentId=1, firstName=Shabbir, lastName=Dawoodi, emailId=shabbir@gmail.com, guardian=Guardian(name=Nikhil, email=nikhil@gmail.com, mobile=9999999999))
+```
+
+## `@Transactional` & `@Modifying` Annotation
+
