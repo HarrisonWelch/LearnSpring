@@ -1539,15 +1539,17 @@ Note: I did not have access to `mvn clean install` so I have to install it from 
 
 I used the jdk from the IntelliJ setup
 
-Java Home like this
+Java Home like this - C:\Users\harri\.jdks\corretto-17.0.8.1
 
 ![JAVA_HOME screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/JAVA_HOME.png)
 
-Maven Home like this
+Maven Home like this - C:\Program Files\Maven\apache-maven-3.9.4
 
 ![MAVEN_HOME screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/MAVEN_HOME.png)
 
 And System Path like this
+* %JAVA_HOME%\bin
+* %MAVEN_HOME%\bin
 
 ![Path screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/Path.png)
 
