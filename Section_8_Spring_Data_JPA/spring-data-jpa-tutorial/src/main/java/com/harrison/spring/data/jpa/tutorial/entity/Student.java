@@ -42,4 +42,5 @@ public class Student {
 
     @Embedded // Put all attrs from Guardian into this class's produced table
     private Guardian guardian;
+
 }

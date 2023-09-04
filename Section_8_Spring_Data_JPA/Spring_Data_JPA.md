@@ -535,3 +535,56 @@ StudentRepository.java:
 * IgnoreCase is there
 
 # JPA `@Query` Annotation
+
+* Creating the method name is not enough
+* You have to put in the query yourself
+
+StudentRepository.java:
+```java
+// JPQL
+@Query("select s from Student s where s.emailId = ?1") // ?1 for the first param
+public Student getStudentByEmailAddress(String emailId);
+```
+
+StudentRepositoryTest.java
+```java
+@Test
+public void printGetStudentByEmailAddress() {
+    Student student = studentRepository.getStudentByEmailAddress("shabbir@gmail.com");
+    System.out.println("student = " + student);
+}
+```
+
+Output:
+```
+Hibernate: select s1_0.student_id,s1_0.email_address,s1_0.first_name,s1_0.guardian_email,s1_0.guardian_mobile,s1_0.guardian_name,s1_0.last_name from tbl_student s1_0 where s1_0.email_address=?
+student = Student(studentId=1, firstName=Shabbir, lastName=Dawoodi, emailId=shabbir@gmail.com, guardian=Guardian(name=Nikhil, email=nikhil@gmail.com, mobile=9999999999))
+```
+
+Can also do query attrs and return them like the first name for example.
+
+StudentRepository.java:
+```java
+// JPQL
+@Query("select s.firstName from Student s where s.emailId = ?1")
+public String getFirstNameByEmailAddress(String emailId);
+```
+
+StudentRepositoryTest.java
+```java
+@Test
+public void printGetFirstNameByEmailAddress() {
+    String firstName = studentRepository.getFirstNameByEmailAddress("shivam@gmail.com");
+    System.out.println("firstName = " + firstName);
+}
+```
+
+Output
+```
+Hibernate: select s1_0.first_name from tbl_student s1_0 where s1_0.email_address=?
+firstName = Shivam
+```
+
+## Native Queries Example
+
+
