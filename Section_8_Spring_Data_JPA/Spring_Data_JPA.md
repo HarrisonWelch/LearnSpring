@@ -859,6 +859,31 @@ We are saving the CourseMaterial before saving the course. Cascading comes into 
 
 ## Cascading
 
+Cascading means to pass the propertiess/permissions to the child element. I want to save the CourseMaterial and I want it persisited. We need to pass that info down. We need to tell Spring to try and persist it as well.
 
+Change the `@OneToOne` annotation to this in CourseMaterial.java
+```java
+    @OneToOne(
+            cascade = CascadeType.ALL // Everything will happen
+    )
+```
 
+Now run the test
 
+Appears to be successful:
+```
+Hibernate: select next_val as id_val from course_material_sequence for update
+Hibernate: update course_material_sequence set next_val= ? where next_val=?
+Hibernate: select next_val as id_val from course_sequence for update
+Hibernate: update course_sequence set next_val= ? where next_val=?
+Hibernate: insert into course (credit,title,course_id) values (?,?,?)
+Hibernate: insert into course_material (course_id,url,course_material_id) values (?,?,?)
+```
+
+Course now on the DB:
+
+![jpa_course_1 screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_update_by_email.png)
+
+Course Material now on the DB:
+
+![jpa_course_material_1 screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_course_material_1.png)

@@ -26,7 +26,9 @@ public class CourseMaterial {
     private String url;
 
     // This CM table will have an extra col "course_id" that connects CM to C.
-    @OneToOne
+    @OneToOne(
+            cascade = CascadeType.ALL // Everything will happen
+    )
     @JoinColumn(
             name = "course_id",
             referencedColumnName = "courseId"
