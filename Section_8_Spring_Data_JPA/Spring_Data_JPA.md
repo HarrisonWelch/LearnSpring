@@ -679,3 +679,186 @@ DB update:
 
 We saw a lot on diff DBs and annotations. Time to move on to the JPA relationship
 
+## JPA One to One Relationship
+* Look back at the ERD from earlier in this section (8)
+* Course class and course Material is a 1 to 1 relationship
+* Create course and course material
+
+Course material must have a course. CM cannot exist without C.
+
+Course.java
+```java
+package com.harrison.spring.data.jpa.tutorial.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Course {
+    // Unique ID
+    // Sequence generator
+    @Id
+    @SequenceGenerator(
+            name = "course_sequence",
+            sequenceName = "course_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "course_sequence"
+    )
+    private Long courseId;
+    private String title;
+    private Integer credit;
+
+}
+```
+
+CourseMaterial.java
+```java
+package com.harrison.spring.data.jpa.tutorial.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class CourseMaterial {
+    @Id
+    @SequenceGenerator(
+            name = "course_material_sequence",
+            sequenceName = "course_material_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "course_material_sequence"
+    )
+    private Long courseMaterialId;
+    private String url;
+
+    // This CM table will have an extra col "course_id" that connects CM to C.
+    @OneToOne
+    @JoinColumn(
+            name = "course_id",
+            referencedColumnName = "courseId"
+    )
+    private Course course;
+}
+```
+
+
+Table output Hibernate
+```
+Hibernate: create table course (course_id bigint not null, credit integer, title varchar(255), primary key (course_id)) engine=InnoDB
+Hibernate: create table course_material_sequence (next_val bigint) engine=InnoDB
+Hibernate: insert into course_material_sequence values ( 1 )
+Hibernate: create table course_sequence (next_val bigint) engine=InnoDB
+Hibernate: insert into course_sequence values ( 1 )
+Hibernate: create table course_material (course_material_id bigint not null, url varchar(255), course_id bigint, primary key (course_material_id)) engine=InnoDB
+Hibernate: alter table course_material drop index UK_h1og6srs8s1xhabgqtkhdf96q
+Hibernate: alter table course_material add constraint UK_h1og6srs8s1xhabgqtkhdf96q unique (course_id)
+Hibernate: alter table course_material add constraint FK6qgylrot7cxgungunwyrslpeo foreign key (course_id) references course (course_id)
+```
+
+
+Table creation:
+
+Course:
+
+![jpa_course screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_update_by_email.png)
+
+Course Material:
+
+![jpa_course_material screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_course_material.png)
+
+Build the repositories and test
+
+CourseRepository:
+```java
+package com.harrison.spring.data.jpa.tutorial.repository;
+
+import com.harrison.spring.data.jpa.tutorial.entity.Course;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CourseRepository extends JpaRepository<Course, Long> {
+}
+```
+
+CourseRepository:
+```java
+package com.harrison.spring.data.jpa.tutorial.repository;
+
+import com.harrison.spring.data.jpa.tutorial.entity.CourseMaterial;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CourseMaterialRepository extends JpaRepository<CourseMaterial, Long> {
+}
+```
+
+And then we make a test.
+
+CourseMaterialRepositoryTest.java
+```java
+package com.harrison.spring.data.jpa.tutorial.repository;
+
+import com.harrison.spring.data.jpa.tutorial.entity.Course;
+import com.harrison.spring.data.jpa.tutorial.entity.CourseMaterial;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+class CourseMaterialRepositoryTest {
+
+    @Autowired
+    private CourseMaterialRepository courseMaterialRepository;
+
+    @Test
+    public void SaveCourseMaterial() {
+        Course course = Course.builder()
+                .title("DSA")
+                .credit(6)
+                .build();
+
+        CourseMaterial courseMaterial = CourseMaterial.builder()
+                .url("www.google.com")
+                .course(course)
+                .build();
+
+        courseMaterialRepository.save(courseMaterial);
+    }
+}
+```
+
+Running this gives error:
+```
+org.springframework.dao.InvalidDataAccessApiUsageException: org.hibernate.TransientPropertyValueException: object references an unsaved transient instance - save the transient instance before flushing : com.harrison.spring.data.jpa.tutorial.entity.CourseMaterial.course -> com.harrison.spring.data.jpa.tutorial.entity.Course
+```
+
+We are saving the CourseMaterial before saving the course. Cascading comes into effect.
+
+## Cascading
+
+
+
+
