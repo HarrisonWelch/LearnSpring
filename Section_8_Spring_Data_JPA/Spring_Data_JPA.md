@@ -943,7 +943,7 @@ Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_ma
 courseMaterials = [CourseMaterial(courseMaterialId=1, url=www.google.com)]
 ```
 
-## Uni & Bi directional Relationship
+## Uni & Bi directional Relationships
 
 Build out a test class
 ```java
@@ -997,3 +997,197 @@ courses = [Course(courseId=1, title=DSA, credit=6, courseMaterial=CourseMaterial
 ```
 
 This is how you define uni-directional in the many relationship types.
+
+## JPA One to Many Relationship
+
+Teacher to Course
+* 1 Teacher can teach multiple courses
+* Or 1 Course can be taught by multiple teachers
+
+Run the app
+
+```java
+package com.harrison.spring.data.jpa.tutorial.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Teacher {
+
+    @Id
+    @SequenceGenerator(
+            name = "teacher_sequence",
+            sequenceName = "teacher_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "teacher_sequence"
+    )
+    private Long teacherId;
+    private String firstName;
+    private String lastName;
+
+    @OneToMany(
+            cascade = CascadeType.ALL
+    )
+    @JoinColumn(
+            name = "teacher_id",
+            referencedColumnName = "teacherId"
+    )
+    private List<Course> courses;
+}
+```
+
+```
+Hibernate: alter table course add column teacher_id bigint
+Hibernate: create table teacher (teacher_id bigint not null, first_name varchar(255), last_name varchar(255), primary key (teacher_id)) engine=InnoDB
+Hibernate: create table teacher_sequence (next_val bigint) engine=InnoDB
+Hibernate: insert into teacher_sequence values ( 1 )
+Hibernate: alter table course add constraint FKsybhlxoejr4j3teomm5u2bx1n foreign key (teacher_id) references teacher (teacher_id)
+```
+
+Now make the repository and a test
+
+```java
+package com.harrison.spring.data.jpa.tutorial.repository;
+
+import com.harrison.spring.data.jpa.tutorial.entity.Course;
+import com.harrison.spring.data.jpa.tutorial.entity.Teacher;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+class TeacherRepositoryTest {
+    @Autowired
+    private TeacherRepository teacherRepository;
+
+    @Test
+    public void saveTeacher() {
+
+        Course courseDBA = Course.builder()
+                .title("DBA")
+                .credit(5)
+                .build();
+
+        Course courseJava = Course.builder()
+                .title("Java")
+                .credit(6)
+                .build();
+
+        Teacher teacher = Teacher.builder()
+                .firstName("Qutub")
+                .lastName("Khan")
+                .courses(List.of(courseDBA, courseJava))
+                .build();
+
+        teacherRepository.save(teacher);
+    }
+
+}
+```
+
+Run the test and see that the teacher is now there with the connected courses.
+
+Hibernate will do its thing and make this for us
+```
+Hibernate: select next_val as id_val from teacher_sequence for update
+Hibernate: update teacher_sequence set next_val= ? where next_val=?
+Hibernate: select next_val as id_val from course_sequence for update
+Hibernate: update course_sequence set next_val= ? where next_val=?
+Hibernate: select next_val as id_val from course_sequence for update
+Hibernate: update course_sequence set next_val= ? where next_val=?
+Hibernate: insert into teacher (first_name,last_name,teacher_id) values (?,?,?)
+Hibernate: insert into course (credit,title,course_id) values (?,?,?)
+Hibernate: insert into course (credit,title,course_id) values (?,?,?)
+Hibernate: update course set teacher_id=? where course_id=?
+Hibernate: update course set teacher_id=? where course_id=?
+```
+
+Teacher is now:
+![jpa_teacher_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_teacher_test.png)
+
+And the courses were added:
+![jpa_course_test_after_teacher screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_course_test_after_teacher.png)
+
+We were allowed to save a Course without a CourseMaterial
+* Optionality
+* By default everything is optional
+
+```java
+@OneToOne(
+        cascade = CascadeType.ALL, // Everything will happen
+        fetch = FetchType.LAZY,
+        optional = false
+)
+```
+
+For example lets try and test a peice of code that will save a Course w/out CM.
+
+Test:
+```java
+    @Test
+    public void SaveCourseMaterial() {
+        Course course = Course.builder()
+                .title("DSA")
+                .credit(6)
+                .build();
+
+        CourseMaterial courseMaterial = CourseMaterial.builder()
+                .url("www.dailycodebuffer.com")
+//                .course(course)
+                .build();
+
+        courseMaterialRepository.save(courseMaterial);
+    }
+```
+```
+Caused by: org.hibernate.PropertyValueException: not-null property references a null or transient value : com.harrison.spring.data.jpa.tutorial.entity.CourseMaterial.course
+```
+
+Fix it to this:
+
+```java
+    @Test
+    public void SaveCourseMaterial() {
+        Course course = Course.builder()
+                .title(".NET")
+                .credit(6)
+                .build();
+
+        CourseMaterial courseMaterial = CourseMaterial.builder()
+                .url("www.dailycodebuffer.com")
+                .course(course)
+                .build();
+
+        courseMaterialRepository.save(courseMaterial);
+    }
+```
+
+And it works so says Hibernate.
+
+```
+Hibernate: select next_val as id_val from course_material_sequence for update
+Hibernate: update course_material_sequence set next_val= ? where next_val=?
+Hibernate: select next_val as id_val from course_sequence for update
+Hibernate: update course_sequence set next_val= ? where next_val=?
+Hibernate: insert into course (credit,title,course_id) values (?,?,?)
+Hibernate: insert into course_material (course_id,url,course_material_id) values (?,?,?)
+```
+
+Look at the DB and it will show the new C & CM.

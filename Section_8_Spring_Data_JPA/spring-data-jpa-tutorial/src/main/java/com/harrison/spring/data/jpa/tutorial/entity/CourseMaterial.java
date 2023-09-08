@@ -26,7 +26,8 @@ public class CourseMaterial {
     // This CM table will have an extra col "course_id" that connects CM to C.
     @OneToOne(
             cascade = CascadeType.ALL, // Everything will happen
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            optional = false
     )
     @JoinColumn(
             name = "course_id",
