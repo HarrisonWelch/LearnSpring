@@ -943,4 +943,57 @@ Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_ma
 courseMaterials = [CourseMaterial(courseMaterialId=1, url=www.google.com)]
 ```
 
+## Uni & Bi directional Relationship
 
+Build out a test class
+```java
+package com.harrison.spring.data.jpa.tutorial.repository;
+
+import com.harrison.spring.data.jpa.tutorial.entity.Course;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+class CourseRepositoryTest {
+
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Test
+    public void printCourses() {
+        List<Course> courses = courseRepository.findAll();
+        System.out.println("courses = " + courses);
+    }
+
+}
+```
+
+Output
+
+```
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.title from course c1_0
+courses = [Course(courseId=1, title=DSA, credit=6)]
+```
+
+Add this to Course to flip it to bi directional
+```java
+@OneToOne(
+        mappedBy = "course"
+)
+private CourseMaterial courseMaterial;
+```
+
+Now the test shows us bringing in the CourseMaterial
+
+```
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.title from course c1_0
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+courses = [Course(courseId=1, title=DSA, credit=6, courseMaterial=CourseMaterial(courseMaterialId=1, url=www.google.com))]
+```
+
+This is how you define uni-directional in the many relationship types.
