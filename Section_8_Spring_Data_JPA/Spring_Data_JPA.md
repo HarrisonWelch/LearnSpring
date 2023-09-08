@@ -887,3 +887,60 @@ Course now on the DB:
 Course Material now on the DB:
 
 ![jpa_course_material_1 screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_course_material_1.png)
+
+## Fetch Types
+
+There are two types.
+* Eager fetching.
+* Lazy fetching.
+
+If and when you want to search the CourseMaterial do you always need to bring in the Material as well.
+
+This exists in the OneToOne anno for example:
+```java
+@OneToOne(
+        cascade = CascadeType.ALL, // Everything will happen
+        fetch = FetchType.LAZY
+)
+```
+
+For this we develop the simple test
+```java
+@Test
+public void printAllCourseMaterials() {
+List<CourseMaterial> courseMaterials = courseMaterialRepository.findAll();
+
+System.out.println("courseMaterials = " + courseMaterials);
+}
+```
+For this we get error "could not initialize proxy"
+
+```
+
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0
+
+org.hibernate.LazyInitializationException: could not initialize proxy [com.harrison.spring.data.jpa.tutorial.entity.Course#1] - no Session
+```
+
+To fix this we need to add ```@ToString(exclude = "course")``` to the CourseMaterial java object.
+
+So you get this:
+```java
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@ToString(exclude = "course")
+public class CourseMaterial {...}
+```
+
+And the test works now
+
+```
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0
+courseMaterials = [CourseMaterial(courseMaterialId=1, url=www.google.com)]
+```
+
+

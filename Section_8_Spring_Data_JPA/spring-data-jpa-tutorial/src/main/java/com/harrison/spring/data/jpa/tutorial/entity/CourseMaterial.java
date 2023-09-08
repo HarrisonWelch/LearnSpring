@@ -1,16 +1,14 @@
 package com.harrison.spring.data.jpa.tutorial.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString(exclude = "course")
 public class CourseMaterial {
     @Id
     @SequenceGenerator(
@@ -27,7 +25,8 @@ public class CourseMaterial {
 
     // This CM table will have an extra col "course_id" that connects CM to C.
     @OneToOne(
-            cascade = CascadeType.ALL // Everything will happen
+            cascade = CascadeType.ALL, // Everything will happen
+            fetch = FetchType.LAZY
     )
     @JoinColumn(
             name = "course_id",
