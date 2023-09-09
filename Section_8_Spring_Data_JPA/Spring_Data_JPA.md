@@ -1271,4 +1271,185 @@ The Course was addded:
 
 ## Paging and Sorting
 
+For every repo, we extend JPA-repo, which extends the `PagingAndSortingRepository<T, ID>`
+* Learn how to use the default method
+* And how to impl custom behavior
 
+```java
+
+    @Test
+    public void findAllPagination() {
+        Pageable firstPageWithThreeRecords = PageRequest.of(0,3);
+        Pageable secondPageWithTwoRecords = PageRequest.of(1,2);
+
+        {
+            List<Course> courses = courseRepository.findAll(firstPageWithThreeRecords).getContent();
+            System.out.println("courses = " + courses);
+
+            long totalElements = courseRepository.findAll(firstPageWithThreeRecords).getTotalElements();
+            System.out.println("totalElements = " + totalElements);
+
+            long totalPages = courseRepository.findAll(firstPageWithThreeRecords).getTotalPages();
+            System.out.println("totalPages = " + totalPages);
+        }
+
+        // ----
+
+        {
+            List<Course> courses = courseRepository.findAll(secondPageWithTwoRecords).getContent();
+            System.out.println("courses = " + courses);
+
+            long totalElements = courseRepository.findAll(secondPageWithTwoRecords).getTotalElements();
+            System.out.println("totalElements = " + totalElements);
+
+            long totalPages = courseRepository.findAll(secondPageWithTwoRecords).getTotalPages();
+            System.out.println("totalPages = " + totalPages);
+        }
+
+    }
+```
+
+Output
+
+```
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.teacher_id,c1_0.title from course c1_0 limit ?,?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select t1_0.teacher_id,t1_0.first_name,t1_0.last_name from teacher t1_0 where t1_0.teacher_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select count(c1_0.course_id) from course c1_0
+courses = [Course(courseId=1, title=DSA, credit=6, courseMaterial=CourseMaterial(courseMaterialId=1, url=www.google.com), teacher=null), Course(courseId=2, title=DBA, credit=5, courseMaterial=null, teacher=Teacher(teacherId=1, firstName=Qutub, lastName=Khan)), Course(courseId=3, title=Java, credit=6, courseMaterial=null, teacher=Teacher(teacherId=1, firstName=Qutub, lastName=Khan))]
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.teacher_id,c1_0.title from course c1_0 limit ?,?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select t1_0.teacher_id,t1_0.first_name,t1_0.last_name from teacher t1_0 where t1_0.teacher_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select count(c1_0.course_id) from course c1_0
+totalElements = 5
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.teacher_id,c1_0.title from course c1_0 limit ?,?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select t1_0.teacher_id,t1_0.first_name,t1_0.last_name from teacher t1_0 where t1_0.teacher_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select count(c1_0.course_id) from course c1_0
+totalPages = 2
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.teacher_id,c1_0.title from course c1_0 limit ?,?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select t1_0.teacher_id,t1_0.first_name,t1_0.last_name from teacher t1_0 where t1_0.teacher_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select count(c1_0.course_id) from course c1_0
+courses = [Course(courseId=3, title=Java, credit=6, courseMaterial=null, teacher=Teacher(teacherId=1, firstName=Qutub, lastName=Khan)), Course(courseId=4, title=.NET, credit=6, courseMaterial=CourseMaterial(courseMaterialId=3, url=www.dailycodebuffer.com), teacher=null)]
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.teacher_id,c1_0.title from course c1_0 limit ?,?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select t1_0.teacher_id,t1_0.first_name,t1_0.last_name from teacher t1_0 where t1_0.teacher_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select count(c1_0.course_id) from course c1_0
+totalElements = 5
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.teacher_id,c1_0.title from course c1_0 limit ?,?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select t1_0.teacher_id,t1_0.first_name,t1_0.last_name from teacher t1_0 where t1_0.teacher_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select count(c1_0.course_id) from course c1_0
+totalPages = 3
+
+```
+
+* The first pack of code lines does the 1st page with 3 records to 3 then 2 more for a total of 5
+* The second pack of code lines does the 2nd page with 2 records so 2, 2, 1 for a total of 5. I think.
+
+### Defining sorting
+
+```java
+    @Test
+    public void findAllSorting() {
+        Pageable sortByTitle =
+                PageRequest.of(
+                        0,
+                        2,
+                        Sort.by("title")
+                );
+        Pageable sortByCreditDesc =
+                PageRequest.of(
+                        0,
+                        2,
+                        Sort.by("credit").descending()
+                );
+        Pageable sortByTitleAndCreditDesc =
+                PageRequest.of(
+                        0,
+                        2,
+                        Sort.by("title")
+                            .descending()
+                            .and(Sort.by("credit"))
+                );
+
+        List<Course> courses = courseRepository.findAll(sortByTitle).getContent();
+        System.out.println("courses = " + courses);
+    }
+```
+
+Output
+
+```
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.teacher_id,c1_0.title from course c1_0 order by c1_0.title limit ?,?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select t1_0.teacher_id,t1_0.first_name,t1_0.last_name from teacher t1_0 where t1_0.teacher_id=?
+Hibernate: select count(c1_0.course_id) from course c1_0
+courses = [Course(courseId=4, title=.NET, credit=6, courseMaterial=CourseMaterial(courseMaterialId=3, url=www.dailycodebuffer.com), teacher=null), Course(courseId=2, title=DBA, credit=5, courseMaterial=null, teacher=Teacher(teacherId=1, firstName=Qutub, lastName=Khan))]
+```
+
+Which shows the sort. ".NET" with the period should go before "DBA"
+
+### Custom methods
+
+In the CourseRepo interface define the method `findByTitleContaining`.
+
+```java
+package com.harrison.spring.data.jpa.tutorial.repository;
+
+import com.harrison.spring.data.jpa.tutorial.entity.Course;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CourseRepository extends JpaRepository<Course, Long> {
+
+    Page<Course> findByTitleContaining(
+            String title,
+            Pageable pageable);
+}
+
+```
+
+Then we can use this in a quick test
+
+```java
+@Test
+public void findByTitleContaining() {
+Pageable firstPageTenRecords =
+        PageRequest.of(0, 10);
+
+List<Course> courses = courseRepository.findByTitleContaining(
+        "D",
+        firstPageTenRecords).getContent();
+
+System.out.println("courses = " + courses);
+}
+```
+
+Output
+```
+Hibernate: select c1_0.course_id,c1_0.credit,c1_0.teacher_id,c1_0.title from course c1_0 where c1_0.title like ? escape '\\' limit ?,?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select c1_0.course_material_id,c1_0.course_id,c1_0.url from course_material c1_0 where c1_0.course_id=?
+Hibernate: select t1_0.teacher_id,t1_0.first_name,t1_0.last_name from teacher t1_0 where t1_0.teacher_id=?
+courses = [Course(courseId=1, title=DSA, credit=6, courseMaterial=CourseMaterial(courseMaterialId=1, url=www.google.com), teacher=null), Course(courseId=2, title=DBA, credit=5, courseMaterial=null, teacher=Teacher(teacherId=1, firstName=Qutub, lastName=Khan))]
+```
+
+So we see only the courses with "D" in the title field that was paginated via Spring.
+
+## JPA Many to Many Relationship
