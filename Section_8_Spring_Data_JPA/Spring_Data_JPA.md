@@ -1191,3 +1191,84 @@ Hibernate: insert into course_material (course_id,url,course_material_id) values
 ```
 
 Look at the DB and it will show the new C & CM.
+
+And the course was added:
+![jpa_course_after_optional_fix_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_course_after_optional_fix_test.png)
+
+And the course material was added:
+![jpa_course_material_after_optional_fix_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_course_material_after_optional_fix_test.png)
+
+## JPA Many to One Relationship
+
+Rather than have a teacher doing a specific course you can have a course that is designed for multiple teachers.
+* You should go for many to one releationships whereever possible
+
+Comment out the OneToMany in Teacher
+
+Add this to the Course Class
+
+```java
+@ManyToOne(
+        cascade = CascadeType.ALL
+)
+@JoinColumn(
+        name = "teacher_id",
+        referencedColumnName = "teacherId"
+)
+private Teacher teacher;
+```
+
+Make a test in `CourseRepositoryTest.java`
+
+```java
+@Test
+public void saveCourseWithTeacher() {
+Teacher teacher = Teacher
+        .builder()
+        .firstName("Priyanka")
+        .lastName("Singh")
+        .build();
+
+Course course = Course
+        .builder()
+        .title("Python")
+        .credit(6)
+        .teacher(teacher)
+        .build();
+
+courseRepository.save(course);
+}
+```
+
+Note: Initial error because of the DB change. Comment out `.courses(List.of(courseDBA, courseJava))`.
+
+Error:
+```
+C:\...\LearnSpring\Section_8_Spring_Data_JPA\spring-data-jpa-tutorial\src\test\java\com\harrison\spring\data\jpa\tutorial\repository\TeacherRepositoryTest.java:34:17
+java: cannot find symbol
+  symbol:   method courses(java.util.List<com.harrison.spring.data.jpa.tutorial.entity.Course>)
+  location: class com.harrison.spring.data.jpa.tutorial.entity.Teacher.TeacherBuilder
+```
+
+But after fixing the error you see something like this in the test log
+
+```
+Hibernate: select next_val as id_val from course_sequence for update
+Hibernate: update course_sequence set next_val= ? where next_val=?
+Hibernate: select next_val as id_val from teacher_sequence for update
+Hibernate: update teacher_sequence set next_val= ? where next_val=?
+Hibernate: insert into teacher (first_name,last_name,teacher_id) values (?,?,?)
+Hibernate: insert into course (credit,teacher_id,title,course_id) values (?,?,?,?)
+```
+
+And the DB will reflect that
+
+The Teacher was added:
+![jpa_course_material_after_optional_fix_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_course_material_after_optional_fix_test.png)
+
+The Course was addded:
+![jpa_teacher_many_to_one_test screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_teacher_many_to_one_test.png)
+
+## Paging and Sorting
+
+
