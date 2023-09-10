@@ -1453,3 +1453,118 @@ courses = [Course(courseId=1, title=DSA, credit=6, courseMaterial=CourseMaterial
 So we see only the courses with "D" in the title field that was paginated via Spring.
 
 ## JPA Many to Many Relationship
+
+* Student to Course
+* Many students can opt for many courses
+* Has to be a 3rd new table
+* This table holds the relationship
+
+```java
+@ManyToMany
+@JoinTable(
+        name = "student_course_map",
+        joinColumns = @JoinColumn(
+                name = "course_id", // DB column name in MySQL
+                referencedColumnName = "courseId" // class property in Java
+        ),
+        inverseJoinColumns = @JoinColumn( // Invert back on itself
+                name = "student_id",
+                referencedColumnName = "studentId"
+        )
+)
+private List<Student> students;
+
+public void addStudents(Student student) {
+if (student == null) students = new ArrayList<>();
+students.add(student);
+}
+```
+
+Start the main SpringDataJpaTutorialApplication.java
+
+We can see hibernate make the map-table:
+```
+Hibernate: create table student_course_map (course_id bigint not null, student_id bigint not null) engine=InnoDB
+Hibernate: alter table student_course_map add constraint FKhtofos1jo0mi02er8bqx62xrd foreign key (student_id) references tbl_student (student_id)
+Hibernate: alter table student_course_map add constraint FK4f31efg3l6lqa5n0yqml6h7c4 foreign key (course_id) references course (course_id)
+```
+
+MySQL workbench after a refresh:
+![jpa_many_to_many_table_create screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_table_create.png)
+
+Now let's make a test that saves this.
+
+```java
+    @Test
+    public void saveCourseWithStudentAndTeacher() {
+        Teacher teacher = Teacher
+                .builder()
+                .firstName("Lizze")
+                .lastName("Morgan")
+                .build();
+
+        Student student = Student
+                .builder()
+                .firstName("Abhishek")
+                .lastName("Singh")
+                .emailId("abhishek@gmail.com")
+                .build();
+
+        Course course = Course
+                .builder()
+                .title("AI")
+                .credit(12)
+                .teacher(teacher)
+                .build();
+
+        course.addStudents(student);
+
+        courseRepository.save(course);
+    }
+
+```
+
+Forgot to define the cascade type so we get another `TransientObjectException`:
+```
+org.springframework.dao.InvalidDataAccessApiUsageException: org.hibernate.TransientObjectException: object references an unsaved transient instance - save the transient instance before flushing: com.harrison.spring.data.jpa.tutorial.entity.Student
+```
+
+Change the many to many annotation to have the cascade set.
+```java
+@ManyToMany(
+        cascade = CascadeType.ALL
+)
+```
+
+Now we have a success and output looks like this:
+```
+Hibernate: select next_val as id_val from course_sequence for update
+Hibernate: update course_sequence set next_val= ? where next_val=?
+Hibernate: select next_val as id_val from teacher_sequence for update
+Hibernate: update teacher_sequence set next_val= ? where next_val=?
+Hibernate: select next_val as id_val from student_sequence for update
+Hibernate: update student_sequence set next_val= ? where next_val=?
+Hibernate: insert into teacher (first_name,last_name,teacher_id) values (?,?,?)
+Hibernate: insert into course (credit,teacher_id,title,course_id) values (?,?,?,?)
+Hibernate: insert into tbl_student (email_address,first_name,guardian_email,guardian_mobile,guardian_name,last_name,student_id) values (?,?,?,?,?,?,?)
+Hibernate: insert into student_course_map (course_id,student_id) values (?,?)
+```
+
+Course:
+![jpa_many_to_many_course screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_course.png)
+
+Teacher:
+![jpa_many_to_many_teacher screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_teacher.png)
+
+Student:
+![jpa_many_to_many_student screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_student.png)
+
+Mapping table:
+![jpa_many_to_many_mapping_table screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_mapping_table.png)
+
+## Wrapping up
+* Various operations covered
+* Default EntityManager, docs - can do own impl yourself
+* Jpa is the preferred choice as it will do alot for you.
+* Plus really good performance as well.
+
