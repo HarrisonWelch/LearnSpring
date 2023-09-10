@@ -505,6 +505,8 @@ public class HelloController {
 ```
 
 Make the securityFilterChain:
+* Note I had to change many things about this method to make it work
+
 ```java
 @Bean
 @SuppressWarnings(value = {"deprecated", "removal"})
@@ -582,3 +584,85 @@ Quick correction, onApplicationEvent should have the
         log.info("Click the link to verify your account: {}", url);
     }
 ```
+
+Now we need to respond to when that user is 
+
+## Respond to the email link
+
+Add a registration controller to respond to the user clicking the link
+
+```java
+@GetMapping("/verifyRegistration")
+public String verifyRegistration(@RequestParam("token") String token) {
+    String result = userService.validateVerficationToken(token);
+    if (result.equalsIgnoreCase("valid")) {
+        return "User Verifies Sucessfully";
+    }
+    return "Bad User";
+}
+```
+
+And then add to the userService
+
+```java
+String validateVerficationToken(String token);
+```
+
+And impl like this 
+
+```java
+@Override
+public String validateVerficationToken(String token) {
+    VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
+
+    // Does that verification exist at all?
+    if (verificationToken == null) {
+        return "invalid";
+    }
+
+    // Pull user
+    User user = verificationToken.getUser();
+    Calendar calendar = Calendar.getInstance();
+
+    // Check expiration
+    if ((verificationToken.getExpirationTime().getTime() - calendar.getTime().getTime()) <= 0) {
+        verificationTokenRepository.delete(verificationToken);
+        return "expired";
+    }
+
+    // User allowed in system
+    user.setEnabled(true);
+    userRepository.save(user);
+
+    // Pass back approve
+    return "valid";
+}
+```
+
+Add the `verifyRegistration` to the list URLS
+
+```java
+private static final String[] WHITE_LIST_URLS = {
+        "/hello/**",
+        "/register/**",
+        "/verifyRegistration/**"
+};
+```
+
+Resend the user on a fresh run the application. Delete or drop all tables to reset the DB.
+
+Now click the link in the logs similar to what was seen previously.
+* Example: http://localhost:8080/verifyRegistration?token=9eabd30e-0308-42a0-857c-cb294fc7338e
+
+User Verifies as seen here:
+
+![sec_verify_user screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_verify_user.png)
+
+And user is enabled on the DB
+
+![sec_db_user_enabled screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_user_enabled.png)
+
+## Resend logic
+
+
+

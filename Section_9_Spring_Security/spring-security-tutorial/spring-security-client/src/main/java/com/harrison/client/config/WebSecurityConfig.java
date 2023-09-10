@@ -25,10 +25,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private static final String[] WHITE_LIST_URLS = {
-//            "/hello",
-//            "/register"
             "/hello/**",
-            "/register/**"
+            "/register/**",
+            "/verifyRegistration/**"
     };
 
     @Bean // So we can autowire it
