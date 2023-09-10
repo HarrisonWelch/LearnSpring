@@ -1551,15 +1551,19 @@ Hibernate: insert into student_course_map (course_id,student_id) values (?,?)
 ```
 
 Course:
+
 ![jpa_many_to_many_course screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_course.png)
 
 Teacher:
+
 ![jpa_many_to_many_teacher screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_teacher.png)
 
 Student:
+
 ![jpa_many_to_many_student screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_student.png)
 
 Mapping table:
+
 ![jpa_many_to_many_mapping_table screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/jpa_many_to_many_mapping_table.png)
 
 ## Wrapping up
@@ -1567,4 +1571,3 @@ Mapping table:
 * Default EntityManager, docs - can do own impl yourself
 * Jpa is the preferred choice as it will do alot for you.
 * Plus really good performance as well.
-
