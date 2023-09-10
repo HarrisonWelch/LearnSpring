@@ -481,3 +481,104 @@ Using generated security password: f7a4dd85-811d-4601-afb1-39f575008f2f
 We want to create a user that bypass the login. We have to impl this.
 
 ## Login Bypass
+
+Make a simple hello controller for testing.
+
+```java
+package com.harrison.client.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
+
+@RestController
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello Welcome to Daily Code Buffer!!";
+    }
+
+}
+```
+
+Make the securityFilterChain:
+```java
+@Bean
+@SuppressWarnings(value = {"deprecated", "removal"})
+SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    httpSecurity
+            .cors()
+            .and()
+            .csrf()
+            .disable()
+            .authorizeHttpRequests()
+//                .antMatchers(WHITE_LIST_URLS).permitAll(); // Removed in later patches
+            .requestMatchers(HttpMethod.GET, WHITE_LIST_URLS).permitAll();
+            .requestMatchers(HttpMethod.POST, WHITE_LIST_URLS).permitAll();
+
+    return httpSecurity.build();
+}
+```
+
+Simple hello test
+![sec_hello screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_hello.png)
+
+Now over in PostMan
+
+```json
+{
+    "firstName":"Shabbir",
+    "lastName":"Dawoodi",
+    "password":"1234567",
+    "email":"shabbir@gmail.com"
+}
+```
+
+Post user in PostMan
+
+![sec_post_user screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_post_user.png)
+
+DB creates user
+
+![sec_db_user_create screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_user_create.png)
+
+But the token did not create:
+
+![sec_db_token_not_made screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_token_not_made.png)
+
+Delete the user from the DB (or drop all tables) and restart the app
+
+Now we can see the verification token (user table matches prev)
+
+![sec_db_veri_token screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_veri_token.png)
+
+Output:
+
+```
+Hibernate: insert into user (email,enabled,first_name,last_name,password,role) values (?,?,?,?,?,?)
+Hibernate: insert into verification_token (expiration_time,token,user_id) values (?,?,?)
+2023-09-10T17:02:26.519-04:00  INFO 30260 --- [nio-8080-exec-1] .h.c.l.RegistrationCompleteEventListener : Click the link to verify your account: http://localhost:8080verifyRegistration?token=b4497cb9-aa2e-4971-bbc9-ca0b5b548ebb
+```
+
+This link will be sent in an email usually, but console will work to mock that route.
+
+Quick correction, onApplicationEvent should have the 
+
+```java
+    @Override
+    public void onApplicationEvent(RegistrationCompleteEvent event) {
+        // Create the verification token for this User
+        User user = event.getUser();
+        String token = UUID.randomUUID().toString();
+        // Save this token on the DB (need to make this entity)
+        userService.saveVerificationTokenForUser(user, token);
+        // Send Mail to user
+        String url = event.getApplicationUrl() + "/verifyRegistration?token=" + token; // Context path
+
+        // sendVerificationEmail() // Mocking it
+        log.info("Click the link to verify your account: {}", url);
+    }
+```

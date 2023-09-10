@@ -6,9 +6,11 @@ import com.harrison.client.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Component
 @Slf4j
 public class RegistrationCompleteEventListener implements
         ApplicationListener<RegistrationCompleteEvent> {
@@ -24,7 +26,7 @@ public class RegistrationCompleteEventListener implements
         // Save this token on the DB (need to make this entity)
         userService.saveVerificationTokenForUser(user, token);
         // Send Mail to user
-        String url = event.getApplicationUrl() + "verifyRegistration?token=" + token; // Context path
+        String url = event.getApplicationUrl() + "/verifyRegistration?token=" + token; // Context path
 
         // sendVerificationEmail() // Mocking it
         log.info("Click the link to verify your account: {}", url);
