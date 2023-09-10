@@ -283,3 +283,146 @@ Change the registration controller to return success
 ```
 
 ## Send user an email on registration
+
+First we need to setup the actual event that will fire the email.
+
+RegistrationCompleteEvent.java:
+
+```java
+package com.harrison.client.event;
+
+import com.harrison.client.entity.User;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.context.ApplicationEvent;
+
+@Getter
+@Setter
+public class RegistrationCompleteEvent extends ApplicationEvent {
+
+    private User user;
+    private String applicationUrl;
+
+    public RegistrationCompleteEvent(User user, String applicationUrl) {
+        super(user);
+        this.user = user;
+        this.applicationUrl = applicationUrl;
+    }
+}
+```
+
+RegistrationCompleteEventListener.java:
+```java
+package com.harrison.client.listener;
+
+import com.harrison.client.entity.User;
+import com.harrison.client.event.RegistrationCompleteEvent;
+import com.harrison.client.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+
+import java.util.UUID;
+
+public class RegistrationCompleteEventListener implements
+        ApplicationListener<RegistrationCompleteEvent> {
+
+    @Autowired
+    private UserService userService;
+
+    @Override
+    public void onApplicationEvent(RegistrationCompleteEvent event) {
+        // Create the verification token for this User
+        User user = event.getUser();
+        String token = UUID.randomUUID().toString();
+        // Save this token on the DB (need to make this entity)
+        userService.saveVerificationTokenForUser(user, token);
+        // Send Mail to user
+    }
+}
+```
+
+VerificationToken.java
+```java
+package com.harrison.client.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.Calendar;
+import java.util.Date;
+
+@Entity
+@Data
+public class VerificationToken {
+
+    // Expiration time is 10 minutes
+    private static final int EXPIRATION_TIME = 10; // minutes
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String token;
+
+    private Date expirationTime;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "FK_USER_VERIFY_TOKEN"))
+    private User user;
+
+    public VerificationToken (User user, String token) {
+        super();
+        this.token = token;
+        this.user = user;
+        this.expirationTime = calculationExpirationTime(EXPIRATION_TIME);
+    }
+
+    public VerificationToken(String token) {
+        super();
+        this.token = token;
+        this.expirationTime = calculationExpirationTime(EXPIRATION_TIME);
+    }
+
+    private Date calculationExpirationTime(int expirationTime) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(new Date().getTime());
+        calendar.add(Calendar.MINUTE, expirationTime);
+        return new Date(calendar.getTime().getTime());
+    }
+}
+```
+
+VerificationTokenRepository.java
+```java
+package com.harrison.client.repository;
+
+
+import com.harrison.client.entity.VerificationToken;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
+}
+```
+
+UserService interface gets a new method
+```java
+void saveVerificationTokenForUser(User user, String token);
+```
+
+UserServiceImpl gets this impl of that method:
+```java
+@Override
+public void saveVerificationTokenForUser(User user, String token) {
+    VerificationToken verificationToken = new VerificationToken(user, token);
+
+    verificationTokenRepository.save(verificationToken);
+}
+```
+
+In this example the email will be put to the console.
+
+Now over to the email part
