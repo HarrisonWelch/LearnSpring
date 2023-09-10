@@ -2,12 +2,14 @@ package com.harrison.client.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Calendar;
 import java.util.Date;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class VerificationToken {
 
     // Expiration time is 10 minutes

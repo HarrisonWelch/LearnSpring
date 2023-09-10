@@ -4,6 +4,7 @@ import com.harrison.client.entity.User;
 import com.harrison.client.event.RegistrationCompleteEvent;
 import com.harrison.client.model.UserModel;
 import com.harrison.client.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,13 +22,20 @@ public class RegistrationController {
     private ApplicationEventPublisher publisher;
 
     @PostMapping("/register")
-    public String registerUser(@RequestBody UserModel userModel) {
+    public String registerUser(@RequestBody UserModel userModel, final HttpServletRequest request) {
         User user = userService.registerUser(userModel);
-        publisher.publishEvent(
-                new RegistrationCompleteEvent(
-                        user,
-                        "url"
-                )); // Build Url later
+        publisher.publishEvent(new RegistrationCompleteEvent(
+            user,
+            applicationUrl(request)
+        )); // Build Url later
         return "Success";
+    }
+
+    private String applicationUrl(HttpServletRequest request) {
+        return "http://" +
+                request.getServerName() +
+                ":" +
+                request.getServerPort() +
+                request.getContextPath();
     }
 }

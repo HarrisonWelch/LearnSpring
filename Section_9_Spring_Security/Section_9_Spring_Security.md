@@ -426,3 +426,58 @@ public void saveVerificationTokenForUser(User user, String token) {
 In this example the email will be put to the console.
 
 Now over to the email part
+
+RegistrationCompleteEventListener:
+```java
+@Override
+public void onApplicationEvent(RegistrationCompleteEvent event) {
+    // Create the verification token for this User
+    User user = event.getUser();
+    String token = UUID.randomUUID().toString();
+    // Save this token on the DB (need to make this entity)
+    userService.saveVerificationTokenForUser(user, token);
+    // Send Mail to user
+    String url = event.getApplicationUrl() + "verifyRegistration?token=" + token; // Context path
+
+    // sendVerificationEmail() // Mocking it
+    log.info("Click the link to verify your account: {}", url);
+}
+```
+
+Change the RegistrationController to pass through this request:
+```java
+@PostMapping("/register")
+public String registerUser(@RequestBody UserModel userModel, final HttpServletRequest request) {
+    User user = userService.registerUser(userModel);
+    publisher.publishEvent(new RegistrationCompleteEvent(
+        user,
+        applicationUrl(request)
+    )); // Build Url later
+    return "Success";
+}
+
+private String applicationUrl(HttpServletRequest request) {
+    return "http://" +
+            request.getServerName() +
+            ":" +
+            request.getServerPort() +
+            request.getContextPath();
+}
+```
+
+Now go to http://localhost:8080/ which should fwd you to the login page
+
+![sec_login screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_login.png)
+
+Spring will give us a default password but we want a custom impl
+
+Output
+```
+...
+Using generated security password: f7a4dd85-811d-4601-afb1-39f575008f2f
+...
+```
+
+We want to create a user that bypass the login. We have to impl this.
+
+## Login Bypass
