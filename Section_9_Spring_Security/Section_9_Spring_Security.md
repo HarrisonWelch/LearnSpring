@@ -236,3 +236,50 @@ Now we go back to the https://start.spring.io/ and enter the security and open t
     <scope>test</scope>
 </dependency>
 ```
+
+Then add to the Web
+
+```java
+package com.harrison.client.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class WebSecurityConfig {
+
+    @Bean // So we can autowire it
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(11);
+    }
+}
+```
+
+Change the UserService to use the encoder
+```java
+    @Override
+    public User registerUser(UserModel userModel) {
+        User user = new User();
+        user.setEmail(userModel.getEmail());
+        user.setFirstName(userModel.getFirstName());
+        user.setLastName(userModel.getLastName());
+        user.setRole("USER");
+        user.setPassword(passwordEncoder.encode(userModel.getPassword()));
+
+        userRepository.save(user);
+        return user;
+    }
+```
+
+Change the registration controller to return success
+```java
+    @PostMapping("/register")
+    public String registerUser(@RequestBody UserModel userModel) {
+        User user = userService.registerUser(userModel);
+        return "Success";
+    }
+```
+
+## Send user an email on registration
