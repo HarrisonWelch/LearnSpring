@@ -703,6 +703,7 @@ public VerificationToken generateNewVerification(String oldToken) {
 Now instead of verifyRegistration on the link we use `resendVerifyToken`
 
 We can use postman for this:
+* http://localhost:8080/verifyRegistration?token=780238e7-b537-4dd4-8f91-832ffdcc292c
 
 ![sec_resend_token screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_resend_token.png)
 
@@ -725,3 +726,109 @@ We can also verify user by clicking the same verifyUser link
 Now we can resend if we didn't get the token the first time.
 
 ## Reset password
+
+RegistrationController.java:
+```java
+@PostMapping("/savePassword")
+public String savePassword(@RequestParam("token") String token,
+                            @RequestBody PasswordModel passwordModel) {
+    String result = userService.validatePasswordResetToken(token);
+    if (!result.equalsIgnoreCase("valid")) {
+        return "Invalid Token";
+    }
+
+    // Token valid, update password
+    Optional<User> user = userService.getUserByPasswordResetToken(token);
+    if (user.isPresent()) {
+        userService.changePassword(user.get(), passwordModel.getNewPassword());
+        return "Password Reset Successful";
+    }
+    return "Invalid Token";
+}
+```
+
+UserService.java
+```java
+String validatePasswordResetToken(String token);
+
+Optional<User> getUserByPasswordResetToken(String token);
+
+void changePassword(User user, String newPassword);
+```
+
+UserServiceImpl.java
+```java
+@Override
+public String validatePasswordResetToken(String token) {
+    PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token);
+
+    // Does that verification exist at all?
+    if (passwordResetToken == null) {
+        return "invalid";
+    }
+
+    // Pull user
+    Calendar calendar = Calendar.getInstance();
+
+    // Check expiration
+    if ((passwordResetToken.getExpirationTime().getTime() - calendar.getTime().getTime()) <= 0) {
+        passwordResetTokenRepository.delete(passwordResetToken);
+        return "expired";
+    }
+
+    // Pass back approve
+    return "valid";
+}
+
+@Override
+public Optional<User> getUserByPasswordResetToken(String token) {
+    return Optional.ofNullable(passwordResetTokenRepository.findByToken(token).getUser());
+}
+
+@Override
+public void changePassword(User user, String newPassword) {
+    user.setPassword(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
+}
+```
+
+Remember to add to the whitelist in WebSecurityConfig it's currently out of date.
+```java
+private static final String[] WHITE_LIST_URLS = {
+        "/hello/**",
+        "/register/**",
+        "/verifyRegistration/**",
+        "/resendVerifyToken/**",
+        "/savePassword/**",
+        "/resetPassword/**"
+};
+```
+
+Going to reset the password for Nikhil.
+
+http://localhost:8080/resetPassword
+
+{
+    "email":"nikhil@gmail.com"
+}
+
+Example:
+
+sec_reset_password
+
+![sec_reset_password screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_reset_password.png)
+
+DB has that reset token:
+
+![sec_reset_password_token screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_reset_password_token.png)
+
+POST to url: http://localhost:8080/savePassword?token=b7e44c38-f409-45dc-94e3-bfc25e77f565
+
+with raw JSON as the body
+{
+    "newPassword":"123"
+}
+
+![sec_reset_password_success screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_reset_password_success.png)
+
+## Change password
