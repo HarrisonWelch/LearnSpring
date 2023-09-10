@@ -825,10 +825,73 @@ DB has that reset token:
 POST to url: http://localhost:8080/savePassword?token=b7e44c38-f409-45dc-94e3-bfc25e77f565
 
 with raw JSON as the body
+```json
 {
     "newPassword":"123"
 }
+```
 
 ![sec_reset_password_success screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_reset_password_success.png)
 
 ## Change password
+
+RegistrationController.java:
+```java
+@PostMapping("/changePassword")
+public String changePassword(@RequestBody PasswordModel passwordModel) {
+    User user = userService.findUserByEmail(passwordModel.getEmail());
+
+    // Check if old is still ok
+    if (!userService.checkIfValidOldPassword(user, passwordModel.getOldPassword())) {
+        return "Invalid Old Password";
+    }
+
+    // Save New Password
+    userService.changePassword(user, passwordModel.getNewPassword());
+
+    return "Password Changed Successfully";
+}
+```
+
+UserService.java
+```java
+void changePassword(User user, String newPassword);
+
+boolean checkIfValidOldPassword(User user, String oldPassword);
+```
+
+UserServiceImpl.java
+```java
+@Override
+public void changePassword(User user, String newPassword) {
+    user.setPassword(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
+}
+
+@Override
+public boolean checkIfValidOldPassword(User user, String oldPassword) {
+    return passwordEncoder.matches(oldPassword, user.getPassword());
+}
+```
+
+Try to use the wrong old password
+```json
+{
+    "email":"nikhil@gmail.com",
+    "oldPassword":"456",
+    "newPassword":"789"
+}
+```
+
+You get the old password invalid error response
+
+![sec_db_invalid_old_password screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_invalid_old_password.png)
+
+Enter it correct and it works
+
+![sec_db_change_password screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_change_password.png)
+
+Mention of this article for which this tutorial is based.
+https://www.baeldung.com/registration-with-spring-mvc-and-spring-security 
+
+## Login functionality - OAuth 2.0 overview

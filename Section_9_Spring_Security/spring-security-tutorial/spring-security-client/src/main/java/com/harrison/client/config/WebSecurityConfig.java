@@ -30,7 +30,8 @@ public class WebSecurityConfig {
             "/verifyRegistration/**",
             "/resendVerifyToken/**",
             "/savePassword/**",
-            "/resetPassword/**"
+            "/resetPassword/**",
+            "/changePassword/**"
     };
 
     @Bean // So we can autowire it
