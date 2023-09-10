@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -69,5 +70,13 @@ public class UserServiceImpl implements UserService {
 
         // Pass back approve
         return "valid";
+    }
+
+    @Override
+    public VerificationToken generateNewVerification(String oldToken) {
+        VerificationToken verificationToken = verificationTokenRepository.findByToken(oldToken);
+        verificationToken.setToken(UUID.randomUUID().toString());
+        verificationTokenRepository.save(verificationToken);
+        return verificationToken;
     }
 }

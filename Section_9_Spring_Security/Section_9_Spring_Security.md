@@ -664,5 +664,64 @@ And user is enabled on the DB
 
 ## Resend logic
 
+RegistrationController.java
 
+```java
+@GetMapping("/resendVerifyToken")
+public String resendVerificationToken(@RequestParam("token") String oldToken, HttpServletRequest request) {
+    VerificationToken verificationToken = userService.generateNewVerification(oldToken);
+    User user = verificationToken.getUser();
+    resendVerificationTokenMail(user, applicationUrl(request), verificationToken);
+    return "Verification link sent.";
+}
 
+private void resendVerificationTokenMail(User user, String applicationUrl, VerificationToken verificationToken) {
+    // Send Mail to user
+    String url = applicationUrl + "/verifyRegistration?token=" + verificationToken.getToken(); // Context path
+
+    // sendVerificationEmail() // Mocking it
+    log.info("Click the link to verify your account: {}", url);
+}
+```
+
+UserService.java:
+```java
+VerificationToken generateNewVerification(String oldToken);
+```
+
+UserServiceImpl.java:
+```java
+@Override
+public VerificationToken generateNewVerification(String oldToken) {
+    VerificationToken verificationToken = verificationTokenRepository.findByToken(oldToken);
+    verificationToken.setToken(UUID.randomUUID().toString());
+    verificationTokenRepository.save(verificationToken);
+    return verificationToken;
+}
+```
+
+Now instead of verifyRegistration on the link we use `resendVerifyToken`
+
+We can use postman for this:
+
+![sec_resend_token screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_resend_token.png)
+
+We will notice the token changed from 
+* c8a2962d-7bf8-4c3d-bdd6-3532b07d7249
+
+To:
+* 780238e7-b537-4dd4-8f91-832ffdcc292c
+
+DB reflects this:
+
+![sec_db_token_change_after_resend screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_token_change_after_resend.png)
+
+So the resend clearly works!
+
+We can also verify user by clicking the same verifyUser link
+
+![sec_db_veri_resend screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_veri_resend.png)
+
+Now we can resend if we didn't get the token the first time.
+
+## Reset password
