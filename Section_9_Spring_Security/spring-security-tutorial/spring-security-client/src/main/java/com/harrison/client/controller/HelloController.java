@@ -13,5 +13,9 @@ public class HelloController {
     public String hello() {
         return "Hello Welcome to Daily Code Buffer!!";
     }
+    @GetMapping("/api/hello")
+    public String apiHello(Principal principal) {
+        return "Hello "+principal.getName()+" Welcome to Daily Code Buffer!! (api)";
+    }
 
 }

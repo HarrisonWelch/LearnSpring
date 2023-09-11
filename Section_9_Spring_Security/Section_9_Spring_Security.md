@@ -1371,3 +1371,112 @@ public class DefaultSecurityConfig {
 ```
 
 ## Register client
+
+client yml
+```yml
+Server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/user_registration
+    username: root
+    password: Bingbong123$
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  security: # Copy details from -- https://github.com/shabbirdwd53/spring-security-tutorial/blob/main/spring-security-client/src/main/resources/application.yml
+    oauth2:
+      client:
+        registration:
+          api-client-oidc:
+            provider: spring
+            client-id: api-client
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
+            scope: openid
+            client-name: api-client-oidc
+          api-client-authorization-code:
+            provider: spring
+            client-id: api-client
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://127.0.0.1:8080/authorized"
+            scope: api.read
+            client-name: api-client-authorization-code
+        provider:
+          spring:
+            issuer-uri: http://auth-server:9000
+```
+
+Add this to the client
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-oauth2-client</artifactId>
+</dependency>
+```
+
+Change WebSecurityConfig.securityFilterChain to this:
+```java
+    @Bean
+    @SuppressWarnings(value = {"deprecated", "removal"})
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
+                .cors()
+                .and()
+                .csrf()
+                .disable()
+                .authorizeHttpRequests()
+//                .antMatchers(WHITE_LIST_URLS).permitAll(); // Removed in later patches
+                .requestMatchers(HttpMethod.GET, WHITE_LIST_URLS).permitAll()
+                .requestMatchers(HttpMethod.POST, WHITE_LIST_URLS).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/**").authenticated()
+                .and()
+                .oauth2Login(oauth2login ->
+                        oauth2login.loginPage("/oauth2/authorization/api-client-oidc"))
+                .oauth2Client(Customizer.withDefaults());
+
+        return httpSecurity.build();
+    }
+```
+
+And add this to the Mappings of the hello controller
+```java
+    @GetMapping("/api/hello")
+    public String apiHello(Principal principal) {
+        return "Hello "+principal.getName()+" Welcome to Daily Code Buffer!! (api)";
+    }
+```
+
+## Resource server creation
+
+Back to start.spring.io
+
+https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.1.3&packaging=jar&jvmVersion=11&groupId=com.harrison&artifactId=Oauth-resource-server&name=Oauth-resource-server&description=Demo%20project%20for%20Spring%20Boot&packageName=com.harrison.Oauth-resource-server&dependencies=web,security,oauth2-resource-server
+
+Table if the link expires:
+| Property      | Setting                                |
+| ------------- | -------------------------------------- |
+| Project       | Maven                                  |
+| Language      | Java                                   |
+| Spring Boot   | 3.1.3 (latest non-snapshot and non-M*) |
+| Group         | com.harrison                               |
+| Artifact      | Oauth-resource-server                 |
+| Name          | Oauth-resource-server                 |
+| Description   | Demo project for Spring Boot           |
+| Package name  | com.harrison.Oauth-resource-server                    |
+| Packing       | Jar                                    |
+| Java          | 11                                     |
+
+Then we are going to add
+* Spring Web
+* Spring Security
+* OAuth Resource Server
+
+

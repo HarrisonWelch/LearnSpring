@@ -32,6 +32,7 @@ public class WebSecurityConfig {
             "/savePassword/**",
             "/resetPassword/**",
             "/changePassword/**"
+//            "/api/**"
     };
 
     @Bean // So we can autowire it
@@ -50,7 +51,13 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests()
 //                .antMatchers(WHITE_LIST_URLS).permitAll(); // Removed in later patches
                 .requestMatchers(HttpMethod.GET, WHITE_LIST_URLS).permitAll()
-                .requestMatchers(HttpMethod.POST, WHITE_LIST_URLS).permitAll();
+                .requestMatchers(HttpMethod.POST, WHITE_LIST_URLS).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/**").authenticated()
+                .and()
+                .oauth2Login(oauth2login ->
+                        oauth2login.loginPage("/oauth2/authorization/api-client-oidc"))
+                .oauth2Client(Customizer.withDefaults());
 
         return httpSecurity.build();
     }
