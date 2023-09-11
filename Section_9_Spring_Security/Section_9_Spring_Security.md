@@ -1454,6 +1454,9 @@ And add this to the Mappings of the hello controller
     }
 ```
 
+Test this by going to localhost:8080/api/hello
+* This cause alot of redirects on my local. My workspace is using Spring6.0 which breaks a number of things.
+
 ## Resource server creation
 
 Back to start.spring.io
@@ -1479,4 +1482,136 @@ Then we are going to add
 * Spring Security
 * OAuth Resource Server
 
+Application.yml rename and place:
+```yml
+server:
+  port: 8090
 
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://auth-server:9000
+```
+
+Add the dependency to the spring client
+
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-webflux</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.projectreactor.netty</groupId>
+    <artifactId>reactor-netty</artifactId>
+</dependency>
+```
+
+In the resource server -> ResourceServerConfig:
+* Note this does not work in my local `mvcMatcher` does not exist in my current workspace. Alot of things changed going into Spring6.0
+```java
+package com.harrison.Oauthresourceserver.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@EnableWebSecurity
+public class ResourceServerConfig {
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
+        httpSecurity
+                .mvcMatcher("/api/**")
+                .authorizeHttpRequests()
+                .mvcMatchers("/api/**")
+                .access("hasAuthority('SCOPE_api.read')")
+                .oauth2ResourceServer()
+                .jwt();
+        return httpSecurity.build();
+    }
+}
+```
+
+And a basic UserController to serve back some dummy data
+```java
+package com.harrison.Oauthresourceserver.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class UserController {
+
+    @GetMapping("/api/users")
+    public String[] getUsers() {
+        return new String[]{"Shabbir", "Nikhil", "Shivam"};
+    }
+}
+```
+
+In the spring-security-client -> WebClientConfiguration.java
+```java
+package com.harrison.client.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.WebClient;
+
+@Configuration
+public class WebClientConfiguration {
+
+    @Bean
+    WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
+        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
+                new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+        return WebClient.builder()
+                .apply(oauth2Client.oauth2Configuration())
+                .build();
+    }
+
+    @Bean
+    OAuth2AuthorizedClientManager authorizedClientManager(
+            ClientRegistrationRepository clientRegistrationRepository,
+            OAuth2AuthorizedClientRepository authorizedClientRepository) {
+
+        OAuth2AuthorizedClientProvider authorizedClientProvider =
+                OAuth2AuthorizedClientProviderBuilder.builder()
+                        .authorizationCode()
+                        .refreshToken()
+                        .build();
+        DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
+                clientRegistrationRepository, authorizedClientRepository);
+        authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+
+        return authorizedClientManager;
+    }
+}
+
+```
+
+In the spring-security-client -> HelloController.java:
+```java
+    @GetMapping("/api/users")
+    public String[] users(@RegisteredOAuth2AuthorizedClient("api-client-authorization") OAuth2AuthorizedClient oAuth2AuthorizedClient) {
+        return this.webClient
+                .get()
+                .uri("http://127.0.0.1:8090/api/users")
+                .attributes(ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient(oAuth2AuthorizedClient))
+                .retrieve()
+                .bodyToMono(String[].class)
+                .block();
+    }
+```
+
+## Wrapping Up
+* Support discord
+* https://www.youtube.com/watch?v=zvR-Oif_nxg&list=PPSV
