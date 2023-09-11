@@ -1280,3 +1280,94 @@ Find hosts:
 Edit the hosts:
 
 ![hosts_edit screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/hosts_edit.png)
+
+## Basic Spring Security configuration
+
+Authenticate all the fields are correct
+
+CustomAuthenticationProvider.java
+```java
+package com.harrison.oauthserver.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CustomAuthenticationProvider implements AuthenticationProvider {
+
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        String username = authentication.getName();
+        String password = authentication.getCredentials().toString();
+        UserDetails user = customUserDetailsService.loadUserByUsername(username);
+        return checkPassword(user, password);
+    }
+
+    private Authentication checkPassword(UserDetails user, String rawPassword) {
+        if (passwordEncoder.matches(rawPassword, user.getPassword())) {
+            return new UsernamePasswordAuthenticationToken(
+                    user.getUsername(),
+                    user.getPassword(),
+                    user.getAuthorities());
+        }
+        throw new BadCredentialsException("Bad Credentials");
+    }
+
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+    }
+}
+```
+
+Bind it in the security config
+
+```java
+package com.harrison.oauthserver.config;
+
+import com.harrison.oauthserver.service.CustomAuthenticationProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@EnableWebSecurity
+public class DefaultSecurityConfig {
+
+    @Autowired
+    private CustomAuthenticationProvider customAuthenticationProvider;
+
+    @Bean
+    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeRequests(authorizeRequests ->
+                        authorizeRequests.anyRequest().authenticated() // any request has to be authenticated
+                )
+                .formLogin(Customizer.withDefaults());
+        return http.build();
+    }
+
+    @Autowired
+    public void bindAuthenticationProvider(AuthenticationManagerBuilder authenticationManagerBuilder) {
+        authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider); // Bind it
+    }
+}
+
+```
+
+## Register client
