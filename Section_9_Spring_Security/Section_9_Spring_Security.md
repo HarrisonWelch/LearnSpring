@@ -895,3 +895,46 @@ Mention of this article for which this tutorial is based.
 https://www.baeldung.com/registration-with-spring-mvc-and-spring-security 
 
 ## Login functionality - OAuth 2.0 overview
+* Stands for Open Authorization is a standard designed to allow a website or application to access resources hosted by other web apps on behalf of the user.
+* Access must be given permission
+
+### OAuth 2.0
+* Authorization protocol not authentication protocol
+* designed primarily as a means of granting access to a set of resources, for example, remote APIs or user's data.
+* OAuth 2.0 uses Access Tokens
+
+### OAuth 2.0 Roles
+* Resource Owner
+* Client
+* Authorization Server
+* Resource Server
+
+### Resource Owner
+* The user or sustem that owns the protected resources and can grant access to them
+* That is the user most times. You. The device operator. The rights owner
+
+### Client
+* The System that requires access to the protected resources. To access resources, the Client must hold the appropriate Access Token.
+
+### Authorization Server
+* This server recieves requests from the Client for Access Tokens and issues them upon sucessful authentication and consent by the Resource Owner.
+
+### Resource Server
+* A server that protects the user's resources and receives access requests from the Client. It accepts and validates an Access Token from the Client and returns the appropriate resources to it.
+
+We impl the Auth server, resource server, and the client.
+
+### OAuth 2.0 Scopes
+* Important
+* Specify the exact reason for which accees to resources may be granted
+* Sign in with Google, enter your G credentials, then presented with a screen of what will be granted
+
+## Abstract Protocol Flow
+* App requests client for auth rights, User grants given back to app
+* App gives Auth grant to the auth server, Auth server gives access token back
+* App gives Access token to resource server, protected resource is given back 
+
+![Abstract Protocol Flow chart](https://assets.digitalocean.com/articles/oauth/abstract_flow.png)
+- Credit digital Ocean: https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
+
+## Impl the Auth server
