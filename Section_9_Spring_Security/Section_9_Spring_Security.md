@@ -22,7 +22,7 @@ Table if the link expires:
 | Project       | Maven                                  |
 | Language      | Java                                   |
 | Spring Boot   | 3.1.3 (latest non-snapshot and non-M*) |
-| Group         | com.name                               |
+| Group         | com.harrison                               |
 | Artifact      | spring-security-client                 |
 | Name          | spring-security-client                 |
 | Description   | Demo project for Spring Boot           |
@@ -1008,6 +1008,151 @@ Token Endpoint Response
 
 ![sec_auth_token_endpoint_res screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_auth_token_endpoint_res.png)
 
-## Impl of the Authorization server
+## Impl of the Authorization server - Setup on the User Service classes
 
 Back to https://start.spring.io/
+
+Link: https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.1.3&packaging=jar&jvmVersion=11&groupId=com.harrison&artifactId=Oauth-authorization-server&name=Oauth-authorization-server&description=Demo%20project%20for%20Spring%20Boot&packageName=com.harrison.oauthserver&dependencies=lombok,data-jpa,mysql,security,web
+
+Table if the link expires:
+| Property      | Setting                                |
+| ------------- | -------------------------------------- |
+| Project       | Maven                                  |
+| Language      | Java                                   |
+| Spring Boot   | 3.1.3 (latest non-snapshot and non-M*) |
+| Group         | com.harrison                               |
+| Artifact      | Oauth-authorization-server              |
+| Name          | Oauth-authorization-server                 |
+| Description   | Demo project for Spring Boot           |
+| Package name  | com.harrison.oauthserver                    |
+| Packing       | Jar                                    |
+| Java          | 11                                     |
+
+Then we are going to add
+* Spring Data JPA
+* Lombok
+* MySQL Driver
+* Spring Web
+* Spring Security
+
+Add one more dependency in the Oauth-authorization-server module pom.xml
+```xml
+<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-authorization-server -->
+<dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-oauth2-authorization-server</artifactId>
+</dependency>
+```
+
+Change the application yml
+
+```yml
+server:
+  port: 9000
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/user_registration
+    username: root
+    password: Bingbong123$
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+```
+
+User object is copied over from the client
+
+```java
+package com.harrison.oauthserver.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Data
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    @Column(length = 60)
+    private String password; // Will be encrypted later
+    private String role;
+    private boolean enabled = false; // default behavior
+}
+
+```
+
+UserRepository.java is the same way
+```java
+package com.harrison.oauthserver.repository;
+
+import com.harrison.oauthserver.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    User findUserByEmail(String email);
+}
+```
+
+CustomUserDetailsService.java is new
+```java
+package com.harrison.oauthserver.service;
+
+import com.harrison.oauthserver.entity.User;
+import com.harrison.oauthserver.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+@Service
+@Transactional
+public class CustomUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // Username is email
+        User user = userRepository.findUserByEmail(email);
+
+        // No user on our DB
+        if (user == null) {
+            throw new UsernameNotFoundException("No User Found");
+        }
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                user.isEnabled(),
+                true,
+                true,
+                true,
+                getAuthorities(List.of(user.getRole()))
+        );
+    }
+
+    private Collection<? extends GrantedAuthority> getAuthorities(List<String> roles) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (String role : roles) {
+            authorities.add(new SimpleGrantedAuthority(role));
+        }
+        return authorities;
+    }
+}
+
+```
