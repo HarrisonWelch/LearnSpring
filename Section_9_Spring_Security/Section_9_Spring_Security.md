@@ -937,4 +937,77 @@ We impl the Auth server, resource server, and the client.
 ![Abstract Protocol Flow chart](https://assets.digitalocean.com/articles/oauth/abstract_flow.png)
 - Credit digital Ocean: https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2
 
-## Impl the Auth server
+## Auth playground
+* OAuth playground: https://www.oauth.com/playground/
+* Register Client -> click register
+* Client registration -> Click the register button at the bottom
+
+![sec_auth_playground screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_auth_playground.png)
+
+A new modal screen comes up with client registration
+
+Example:
+```
+client_id	Qy1LGghTHRRSAoLDJPS4Cml8
+client_secret	5QG7k21M9yJlDuALHPOI-hC6GfyOnMdleKtGgg-C-wuD44Qo
+login	foolish-rattlesnake@example.com
+password	Selfish-Mockingbird-58
+```
+
+![sec_auth_register screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_auth_register.png)
+
+Given a link
+
+```sh
+https://authorization-server.com/authorize?
+  response_type=code
+  &client_id=Qy1LGghTHRRSAoLDJPS4Cml8
+  &redirect_uri=https://www.oauth.com/playground/authorization-code.html
+  &scope=photo+offline_access
+  &state=ADZG-smA6_WeQc0t
+```
+
+![sec_auth_build_auth_url screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_auth_build_auth_url.png)
+
+Login
+
+![sec_auth_login screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_auth_login.png)
+
+Consent
+
+![sec_auth_consent screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_auth_consent.png)
+
+Matches or Doesnt
+
+![sec_auth_verify screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_auth_verify.png)
+
+Auth Code
+
+```sh
+POST https://authorization-server.com/token
+
+grant_type=authorization_code
+&client_id=Qy1LGghTHRRSAoLDJPS4Cml8
+&client_secret=5QG7k21M9yJlDuALHPOI-hC6GfyOnMdleKtGgg-C-wuD44Qo
+&redirect_uri=https://www.oauth.com/playground/authorization-code.html
+&code=BbsJfHTnNOXHEUBM2IgG0NYcLNxYKRzW7pfZ5i3_6UppSUfJ
+```
+
+![sec_db_auth_code screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_db_auth_code.png)
+
+Token Endpoint Response
+```json
+{
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "access_token": "w5urqRIZTlb02FO-bkhgmKF6oezhBQYpvVwMaejciHSogpQRlTUa3Vwjj7d_Yblw6UvwiJax",
+  "scope": "photo offline_access",
+  "refresh_token": "_cupH5viZlESyMiZkyCqhI9S"
+}
+```
+
+![sec_auth_token_endpoint_res screenshot](https://github.com/HarrisonWelch/LearnSpring/blob/main/Screenshots/sec_auth_token_endpoint_res.png)
+
+## Impl of the Authorization server
+
+Back to https://start.spring.io/
